@@ -148,7 +148,7 @@ export function HeroMasthead(p: Props) {
       </div>
 
       {/* Copy on the paper */}
-      <div className="relative z-10 flex h-full flex-col justify-between pb-24 pt-[calc(var(--header-h)+1.25rem)] text-ink md:pb-10">
+      <div className="relative z-10 flex h-full flex-col justify-between pb-24 pt-[calc(var(--header-h)+1.25rem)] text-ink md:pb-24">
         <div className="wrap" data-hero-fade>
           <div className="anim-fade flex items-start justify-between gap-6" style={{ ["--d" as string]: "0.3s" }}>
             <p className="t-eyebrow max-w-[14rem] leading-relaxed md:max-w-none">{p.eyebrow}</p>

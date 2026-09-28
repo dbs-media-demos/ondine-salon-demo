@@ -38,7 +38,7 @@ const meta = (key: PageKey, title: L, desc: L, image: ImgKey) => (locale: Locale
 
 export const giftCardsMetadata = meta(
   "giftCards",
-  { sr: "Poklon vaučeri — frizerski salon Ondine, Dorćol", en: "Gift cards — Ondine hair salon, Belgrade" },
+  { sr: "Poklon vaučeri — frizerski salon u Dorćolu", en: "Gift cards — hair salon gift vouchers in Belgrade" },
   {
     sr: "Poklonite balayage, manikir ili keratin. Poklon vaučeri ateljea Ondine od 3.000 RSD, e-mailom odmah ili štampani u koverti. Važe 12 meseci za sve usluge.",
     en: "Give balayage, a manicure or keratin. Ondine gift cards from 3,000 RSD, emailed instantly or printed in an envelope. Valid 12 months for every service.",
@@ -90,7 +90,7 @@ export function GiftCardsView({ locale }: { locale: Locale }) {
 
 export const reviewsMetadata = meta(
   "reviews",
-  { sr: "Utisci klijenata — 4,9 ★ na Google-u | Ondine Dorćol", en: "Client reviews — 4.9 ★ on Google | Ondine Belgrade" },
+  { sr: "Utisci klijenata — 4,9 ★ na Google-u, Dorćol", en: "Client reviews — 4.9 ★ on Google, Belgrade" },
   {
     sr: "Šta klijenti kažu o ateljeu Ondine u Dorćolu: 312 Google recenzija, prosečna ocena 4,9. Balayage, šišanje, nokti, obrve i venčane frizure.",
     en: "What clients say about Ondine in Dorćol, Belgrade: 312 Google reviews, 4.9 average. Balayage, cuts, nails, brows and bridal hair.",
@@ -159,7 +159,7 @@ export function ReviewsView({ locale }: { locale: Locale }) {
 
 export const faqMetadata = meta(
   "faq",
-  { sr: "Česta pitanja — zakazivanje, cene, parking | Ondine", en: "FAQ — booking, prices, parking | Ondine Belgrade" },
+  { sr: "Česta pitanja — zakazivanje, cene, parking", en: "FAQ — booking, prices and parking in Belgrade" },
   {
     sr: "Odgovori na najčešća pitanja: kako zakazati i otkazati termin, kako se određuje dužina kose, načini plaćanja, parking u Dorćolu i preparati koje koristimo.",
     en: "Answers to common questions: booking and cancelling, how hair length is priced, payment methods, parking in Dorćol and the products we use.",
@@ -247,7 +247,7 @@ export function BookingView({ locale }: { locale: Locale }) {
 
 export const contactMetadata = meta(
   "contact",
-  { sr: "Kontakt — Strahinjića Bana 44, Dorćol, Beograd | Ondine", en: "Contact — Strahinjića Bana 44, Dorćol, Belgrade | Ondine" },
+  { sr: "Kontakt — Strahinjića Bana 44, Dorćol, Beograd", en: "Contact — Strahinjića Bana 44, Dorćol, Belgrade" },
   {
     sr: "Adresa, telefon i radno vreme ateljea Ondine: Strahinjića Bana 44, Dorćol, Beograd. Uto–sub 9–21 h. Pišite nam ili zakažite online.",
     en: "Address, phone and opening hours for Ondine: Strahinjića Bana 44, Dorćol, Belgrade. Tue–Sat 9 am–9 pm. Message us or book online.",

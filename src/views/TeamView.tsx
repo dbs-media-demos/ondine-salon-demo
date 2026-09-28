@@ -95,7 +95,10 @@ export function TeamView({ locale }: { locale: Locale }) {
           { name: c.title, url },
         ]}
       />
-      <section className="theme-cream pb-24">
+      <section className="theme-cream pb-24" aria-labelledby="team-grid">
+        <h2 id="team-grid" className="sr-only">
+          {c.title}
+        </h2>
         <div className="wrap grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5">
           {cards.map((s, i) => (
             <StylistCard key={s.id} s={s} index={i} tapHint={c.hint} />
