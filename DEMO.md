@@ -4,7 +4,7 @@
 - Market / city: RS – Beograd (Dorćol)
 - Languages: sr + en (Serbian Latin at `/`, English at `/en`, localized slugs, hreflang)
 - Live URL: https://ondine-salon-demo.vercel.app
-- Repo: local only (git initialised; GitHub org/account not chosen yet)
+- Repo: https://github.com/dbs-media-demos/ondine-salon-demo (public, branch main)
 - Folder: DBS Media Portfolio/Demo Websites/salon
 - Stack: Next.js 16.3.6, React 19.2.8, Tailwind v4, GSAP (ScrollTrigger, SplitText), Lenis
 - Palette: #0F0B0C ink · #F4EDE4 cream · #E8D3C7 blush · #C6A08A nude · #5A1A29 wine · #B89468 champagne   Fonts: Bodoni Moda (self-hosted subset, optical-size axis), Hanken Grotesk
