@@ -36,6 +36,6 @@ export const site = {
 
 /** The agency behind this concept site. Single source of truth for every credit link. */
 export const agency = { name: "Scale by Noon" } as const;
-export const agencyUrl = "https://scale-by-noon.vercel.app";
+export const agencyUrl = "https://www.scalebynoon.com";
 
 export const absoluteUrl = (path = "/") => `${siteUrl}${path === "/" ? "" : path}`;

@@ -1,6 +1,6 @@
 # Ondine — hair & beauty atelier (Scale by Noon concept site)
 
-A fictional premium salon in Dorćol, Belgrade, built by [Scale by Noon](https://scale-by-noon.vercel.app) as a portfolio demo. Serbian (Latin) at `/`, English at `/en`.
+A fictional premium salon in Dorćol, Belgrade, built by [Scale by Noon](https://www.scalebynoon.com) as a portfolio demo. Serbian (Latin) at `/`, English at `/en`.
 
 ```bash
 npm install
