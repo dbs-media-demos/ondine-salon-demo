@@ -336,7 +336,7 @@ export const privacyMetadata = meta(
 
 const privacy = {
   sr: [
-    ["Ko smo", "Ondine atelje za kosu i lepotu, Strahinjića Bana 44, 11000 Beograd. Za pitanja o podacima pišite na hello@ondine.rs. Napomena: ovo je konceptni sajt koji je izradio DBS Media; salon je izmišljen i nijedan podatak se ne šalje niti čuva."],
+    ["Ko smo", "Ondine atelje za kosu i lepotu, Strahinjića Bana 44, 11000 Beograd. Za pitanja o podacima pišite na hello@ondine.rs. Napomena: ovo je konceptni sajt koji je izradio Scale by Noon; salon je izmišljen i nijedan podatak se ne šalje niti čuva."],
     ["Koje podatke prikupljamo", "Pri zakazivanju: ime, broj telefona, e-mail (opciono) i napomenu. Pri kupovini vaučera: e-mail kupca i ime primaoca. Ne prikupljamo podatke o platnim karticama — plaćanje obrađuje banka."],
     ["Zašto", "Isključivo da bismo potvrdili i podsetili vas na termin, odnosno isporučili vaučer. Podatke ne prodajemo i ne delimo sa trećim licima osim sa sistemom za zakazivanje koji koristimo."],
     ["Koliko dugo", "Podatke o terminima čuvamo 24 meseca od poslednje posete, zatim ih brišemo. Možete zatražiti brisanje u bilo kom trenutku."],
@@ -344,7 +344,7 @@ const privacy = {
     ["Vaša prava", "U skladu sa Zakonom o zaštiti podataka o ličnosti imate pravo na pristup, ispravku, brisanje i prigovor Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti."],
   ],
   en: [
-    ["Who we are", "Ondine hair & beauty atelier, Strahinjića Bana 44, 11000 Belgrade, Serbia. For data questions email hello@ondine.rs. Note: this is a concept site built by DBS Media; the salon is fictional and no data is sent or stored."],
+    ["Who we are", "Ondine hair & beauty atelier, Strahinjića Bana 44, 11000 Belgrade, Serbia. For data questions email hello@ondine.rs. Note: this is a concept site built by Scale by Noon; the salon is fictional and no data is sent or stored."],
     ["What we collect", "When you book: name, phone number, email (optional) and a note. When you buy a gift card: the buyer's email and the recipient's name. We never collect card details — payments are handled by the bank."],
     ["Why", "Only to confirm and remind you of your appointment, or to deliver a gift card. We don't sell your data or share it with anyone except the booking system we use."],
     ["How long", "Appointment data is kept for 24 months after your last visit, then deleted. You can ask us to delete it at any time."],

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { site, siteUrl } from "./site";
+import { agency, agencyUrl, site, siteUrl } from "./site";
 import type { Locale } from "./i18n";
 import { getDictionary } from "@/i18n/dictionary";
 
@@ -10,8 +10,8 @@ export function rootMetadata(locale: Locale): Metadata {
     title: { default: `${site.name} — ${dict.descriptor}`, template: `%s | ${site.name}` },
     description: dict.brandLine,
     applicationName: site.name,
-    authors: [{ name: "DBS Media", url: "https://dbs-media.com" }],
-    creator: "DBS Media",
+    authors: [{ name: agency.name, url: agencyUrl }],
+    creator: agency.name,
     publisher: site.name,
     category: "Beauty salon",
     formatDetection: { telephone: false, email: false, address: false },

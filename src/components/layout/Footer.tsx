@@ -7,7 +7,7 @@ import { getDictionary } from "@/i18n/dictionary";
 import type { Locale } from "@/lib/i18n";
 import { pageHref, serviceHref } from "@/lib/routes";
 import { services } from "@/content/services";
-import { site } from "@/lib/site";
+import { agencyUrl, site } from "@/lib/site";
 
 export function Footer({ locale }: { locale: Locale }) {
   const d = getDictionary(locale);
@@ -110,7 +110,7 @@ export function Footer({ locale }: { locale: Locale }) {
           <Link href={pageHref(locale, "privacy")} className="link-draw hover:text-cream">
             {d.nav.privacy}
           </Link>
-          <a href="https://dbs-media.com" target="_blank" rel="noopener" className="link-draw hover:text-cream">
+          <a href={agencyUrl} target="_blank" rel="noopener" className="link-draw hover:text-cream">
             {d.footer.credit} ↗
           </a>
         </div>

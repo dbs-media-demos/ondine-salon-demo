@@ -1,4 +1,4 @@
-/** Fictional business details — a DBS Media concept site. */
+/** Fictional business details — a Scale by Noon concept site. */
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ondine-salon-demo.vercel.app").replace(/\/$/, "");
 
 export const site = {
@@ -33,5 +33,9 @@ export const site = {
   areaServed: ["Dorćol", "Stari grad", "Vračar", "Savamala", "Senjak", "Novi Beograd", "Zemun"],
   noindex: process.env.NEXT_PUBLIC_NOINDEX !== "false",
 } as const;
+
+/** The agency behind this concept site. Single source of truth for every credit link. */
+export const agency = { name: "Scale by Noon" } as const;
+export const agencyUrl = "https://scale-by-noon.vercel.app";
 
 export const absoluteUrl = (path = "/") => `${siteUrl}${path === "/" ? "" : path}`;

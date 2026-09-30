@@ -1,6 +1,6 @@
-# Ondine (DBS Media demo)
+# Ondine (Scale by Noon demo)
 
-- Niche: hair & beauty salon         (matches dbs-media.com industry id: salons)
+- Niche: hair & beauty salon         (matches scale-by-noon.vercel.app industry id: salons)
 - Market / city: RS – Beograd (Dorćol)
 - Languages: sr + en (Serbian Latin at `/`, English at `/en`, localized slugs, hreflang)
 - Live URL: https://ondine-salon-demo.vercel.app
