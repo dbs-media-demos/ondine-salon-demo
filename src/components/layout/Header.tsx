@@ -29,6 +29,8 @@ type Props = {
   address: string;
   instagram: string;
   instagramUrl: string;
+  /** A preview's business name, shown instead of the Ondine wordmark. */
+  brandName?: string;
 };
 
 export function Header(p: Props) {
@@ -106,8 +108,17 @@ export function Header(p: Props) {
         )}
       >
         <div className="wrap flex h-[var(--header-h)] items-center justify-between gap-6">
-          <Link href={p.homeHref} prefetch={false} className="relative z-10 -ml-1 p-1" aria-label={p.locale === "sr" ? "Ondine — početna" : "Ondine — home"}>
-            <Logo className="h-[1.35rem] w-auto md:h-6" animate />
+          <Link
+            href={p.homeHref}
+            prefetch={false}
+            className="relative z-10 -ml-1 p-1"
+            aria-label={`${p.brandName ?? "Ondine"} — ${p.locale === "sr" ? "početna" : "home"}`}
+          >
+            {p.brandName ? (
+              <span className="block max-w-[13rem] truncate font-serif text-[1.45rem] leading-none tracking-[-0.01em] md:max-w-[20rem] md:text-[1.7rem]">{p.brandName}</span>
+            ) : (
+              <Logo className="h-[1.35rem] w-auto md:h-6" animate />
+            )}
           </Link>
 
           <nav aria-label={p.locale === "sr" ? "Glavna navigacija" : "Main navigation"} className="hidden lg:block">
@@ -232,9 +243,11 @@ export function Header(p: Props) {
               </div>
               <div>
                 <OpenBadge locale={p.locale} className="text-cream" />
-                <a href={p.instagramUrl} target="_blank" rel="noopener" className="mt-3 block hover:text-cream">
-                  Instagram {p.instagram} ↗
-                </a>
+                {p.instagram && (
+                  <a href={p.instagramUrl} target="_blank" rel="noopener" className="mt-3 block hover:text-cream">
+                    Instagram {p.instagram} ↗
+                  </a>
+                )}
               </div>
             </div>
           </div>

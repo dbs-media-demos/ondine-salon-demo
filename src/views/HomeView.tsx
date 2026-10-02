@@ -23,6 +23,8 @@ import { graph, businessSchema, webPageSchema } from "@/lib/schema";
 import { railLooks, serviceRows, stylistCards } from "@/lib/view-models";
 import { services } from "@/content/services";
 import { site } from "@/lib/site";
+import { PreviewMap } from "@/components/preview/PreviewMap";
+import { openDays, type Biz } from "@/lib/biz-core";
 
 const copy = {
   sr: {
@@ -147,18 +149,47 @@ export function homeMetadata(locale: Locale): Metadata {
   });
 }
 
-export function HomeView({ locale }: { locale: Locale }) {
-  const d = getDictionary(locale);
+/** A preview's own copy: its name and area, and numbers that are true of it (rating, opening days). */
+function previewCopy(locale: Locale, biz: Biz) {
   const c = copy[locale];
+  const sr = locale === "sr";
+  const days = openDays(biz);
+  return {
+    ...c,
+    eyebrow: sr ? `Atelje za kosu i lepotu — ${biz.area}` : `Hair & beauty atelier — ${biz.area}`,
+    srTitle: `${biz.name}:`,
+    afterSub: sr ? "Zakažite termin online" : "Book online",
+    manifestoEyebrow: sr ? "Atelje" : "Atelier",
+    manifesto: sr
+      ? `${biz.shortName} je atelje u kome se kosa ne „radi“ — već se sluša. Boja koja raste lepo, rez koji pada sam od sebe i tišina umesto buke fena.`
+      : `${biz.shortName} is an atelier where hair isn't 'done' — it's listened to. Colour that grows out beautifully, a cut that falls into place on its own, and calm instead of the roar of dryers.`,
+    stats: [
+      ...(biz.rating ? [{ v: biz.rating.count, l: sr ? "Google recenzija" : "Google reviews" }] : []),
+      ...(days ? [{ v: days, l: sr ? "dana nedeljno radimo" : "days a week we're open" }] : []),
+      { v: services.length, l: sr ? "usluga pod jednim krovom" : "services under one roof" },
+    ],
+  };
+}
+
+/**
+ * The homepage. A personalised preview (/for/<token>, /en/for/<token>) passes a real business:
+ * its name is cut into the masthead, its rating, hours and a map of its address replace Ondine's,
+ * and the fictional team and Instagram step aside (and the dinar price list on English previews).
+ */
+export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
+  const d = getDictionary(locale);
+  const c = biz ? previewCopy(locale, biz) : copy[locale];
 
   return (
     <PageShell>
-      <JsonLd
-        data={graph(
-          businessSchema(locale, d.brandLine),
-          webPageSchema({ locale, url: pageHref(locale, "home"), name: `${site.name} — ${d.descriptor}`, description: d.brandLine }),
-        )}
-      />
+      {!biz && (
+        <JsonLd
+          data={graph(
+            businessSchema(locale, d.brandLine),
+            webPageSchema({ locale, url: pageHref(locale, "home"), name: `${site.name} — ${d.descriptor}`, description: d.brandLine }),
+          )}
+        />
+      )}
       <HeroMasthead
         locale={locale}
         eyebrow={c.eyebrow}
@@ -172,6 +203,7 @@ export function HomeView({ locale }: { locale: Locale }) {
         pricesHref={pageHref(locale, "prices")}
         pricesLabel={c.prices}
         scrollLabel={c.scroll}
+        name={biz?.shortName}
       />
 
       {/* Manifesto */}
@@ -246,57 +278,65 @@ export function HomeView({ locale }: { locale: Locale }) {
         <p className="t-display max-w-[12ch]">{c.video}</p>
       </VideoWindow>
 
-      {/* Prices preview */}
-      <section className="theme-cream py-24 md:py-36" aria-labelledby="prices-title">
-        <div className="wrap grid gap-14 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="lg:sticky lg:top-28 lg:self-start">
-            <p className="t-eyebrow mb-6 text-wine">{c.pricesEyebrow}</p>
-            <SplitReveal id="prices-title" className="t-h2">
-              {c.pricesTitle}
-            </SplitReveal>
-            <Reveal>
-              <p className="t-lead mt-8 max-w-md text-muted">{c.pricesText}</p>
-              <div className="mt-8">
-                <Button href={pageHref(locale, "prices")}>{c.pricesAll}</Button>
-              </div>
-            </Reveal>
-            <Parallax className="mt-12 hidden aspect-[4/3] lg:block" amount={10}>
-              <div className="absolute inset-0">
-                <Photo k="product-pair" alt={locale === "sr" ? "Profesionalni šampon i regenerator" : "Professional shampoo and conditioner"} sizes="30vw" />
-              </div>
-            </Parallax>
-          </div>
-          <Reveal>
-            <PriceList locale={locale} compact />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Team */}
-      <section className="theme-cream border-t border-line py-24 md:py-36" aria-labelledby="team-title">
-        <div className="wrap">
-          <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div>
-              <p className="t-eyebrow mb-6 text-wine">{c.teamEyebrow}</p>
-              <SplitReveal id="team-title" className="t-h2 max-w-[14ch]">
-                {c.teamTitle}
+      {!(biz && locale === "en") && (
+        <>
+        {/* Prices preview */}
+        <section className="theme-cream py-24 md:py-36" aria-labelledby="prices-title">
+          <div className="wrap grid gap-14 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="lg:sticky lg:top-28 lg:self-start">
+              <p className="t-eyebrow mb-6 text-wine">{c.pricesEyebrow}</p>
+              <SplitReveal id="prices-title" className="t-h2">
+                {c.pricesTitle}
               </SplitReveal>
+              <Reveal>
+                <p className="t-lead mt-8 max-w-md text-muted">{c.pricesText}</p>
+                <div className="mt-8">
+                  <Button href={pageHref(locale, "prices")}>{c.pricesAll}</Button>
+                </div>
+              </Reveal>
+              <Parallax className="mt-12 hidden aspect-[4/3] lg:block" amount={10}>
+                <div className="absolute inset-0">
+                  <Photo k="product-pair" alt={locale === "sr" ? "Profesionalni šampon i regenerator" : "Professional shampoo and conditioner"} sizes="30vw" />
+                </div>
+              </Parallax>
             </div>
-            <Button href={pageHref(locale, "team")} variant="outline">
-              {c.teamAll}
-            </Button>
+            <Reveal>
+              <PriceList locale={locale} compact />
+            </Reveal>
           </div>
-          <Reveal stagger={0.1} className="grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5">
-            {stylistCards(locale).map((s, i) => (
-              <StylistCard key={s.id} s={s} index={i} tapHint={c.teamHint} />
-            ))}
-          </Reveal>
-        </div>
-      </section>
+        </section>
+        </>
+      )}
 
-      <ReviewsSection locale={locale} />
-      <InstaGrid locale={locale} />
-      <VisitSection locale={locale} />
+      {!biz && (
+        <>
+        {/* Team */}
+        <section className="theme-cream border-t border-line py-24 md:py-36" aria-labelledby="team-title">
+          <div className="wrap">
+            <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+              <div>
+                <p className="t-eyebrow mb-6 text-wine">{c.teamEyebrow}</p>
+                <SplitReveal id="team-title" className="t-h2 max-w-[14ch]">
+                  {c.teamTitle}
+                </SplitReveal>
+              </div>
+              <Button href={pageHref(locale, "team")} variant="outline">
+                {c.teamAll}
+              </Button>
+            </div>
+            <Reveal stagger={0.1} className="grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5">
+              {stylistCards(locale).map((s, i) => (
+                <StylistCard key={s.id} s={s} index={i} tapHint={c.teamHint} />
+              ))}
+            </Reveal>
+          </div>
+        </section>
+        </>
+      )}
+
+      <ReviewsSection locale={locale} biz={biz} />
+      {!biz && <InstaGrid locale={locale} />}
+      {biz ? <PreviewMap biz={biz} locale={locale} /> : <VisitSection locale={locale} />}
     </PageShell>
   );
 }

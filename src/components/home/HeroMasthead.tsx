@@ -29,6 +29,8 @@ type Props = {
   pricesHref: string;
   pricesLabel: string;
   scrollLabel: string;
+  /** A preview's business name, cut out of the paper instead of ONDINE. */
+  name?: string;
 };
 
 /**
@@ -80,8 +82,11 @@ export function HeroMasthead(p: Props) {
           // which resets the LCP candidate and delays LCP.
           scrollTrigger: { trigger: el, start: "top top", end: "+=150%", scrub: 0.8, pin: true, pinSpacer: spacer.current, anticipatePin: 1 },
         });
-        tl.to("[data-hero-fade]", { opacity: 0, y: -50, duration: 0.18, stagger: 0.02 }, 0)
-          .fromTo(zoom, { scale: 1 }, { scale: desktop ? 70 : 55, svgOrigin: `${o.x} ${o.y}`, ease: "power3.in", duration: 0.72 }, 0.06)
+        tl.to("[data-hero-fade]", { opacity: 0, y: -50, duration: 0.18, stagger: 0.02 }, 0);
+        // The camera flies into ONDINE's "I"; a preview's name has no fixed letter there, so its paper lifts away instead
+        if (p.name) tl.to("[data-paper]", { opacity: 0, ease: "power2.in", duration: 0.6 }, 0.1);
+        else tl.fromTo(zoom, { scale: 1 }, { scale: desktop ? 70 : 55, svgOrigin: `${o.x} ${o.y}`, ease: "power3.in", duration: 0.72 }, 0.06);
+        tl
           .fromTo("[data-hero-shade]", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.62)
           .fromTo("[data-hero-after]", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 0.7);
       });
@@ -95,7 +100,26 @@ export function HeroMasthead(p: Props) {
     { scope: root },
   );
 
-  const letters = <path d={MASTHEAD.d} fill="#000" />;
+  // A preview's name is set in the same Didone, sized to fill the masthead's width
+  const nameSize = p.name ? Math.min(2100, MASTHEAD.width / (p.name.length * 0.66)) : 0;
+  const letters = p.name ? (
+    <text
+      x={MASTHEAD.width / 2}
+      y={MASTHEAD.height / 2}
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontFamily="var(--font-bodoni), Didot, Georgia, serif"
+      fontSize={nameSize}
+      fill="#000"
+      stroke="#000"
+      strokeWidth={nameSize * 0.025}
+      {...(p.name.length > 5 ? { textLength: MASTHEAD.width, lengthAdjust: "spacingAndGlyphs" } : {})}
+    >
+      {p.name.toUpperCase()}
+    </text>
+  ) : (
+    <path d={MASTHEAD.d} fill="#000" />
+  );
   const big = { x: -20000, y: -20000, width: 40000, height: 40000 };
 
   return (
@@ -130,7 +154,7 @@ export function HeroMasthead(p: Props) {
               </g>
             </mask>
           </defs>
-          <rect {...big} fill="var(--cream)" mask="url(#hero-mask-d)" />
+          <rect data-paper {...big} fill="var(--cream)" mask="url(#hero-mask-d)" />
         </svg>
         <svg viewBox="0 0 400 860" preserveAspectRatio="xMidYMid meet" className="absolute inset-0 h-full w-full overflow-visible md:hidden">
           <defs>
@@ -143,7 +167,7 @@ export function HeroMasthead(p: Props) {
               </g>
             </mask>
           </defs>
-          <rect {...big} fill="var(--cream)" mask="url(#hero-mask-m)" />
+          <rect data-paper {...big} fill="var(--cream)" mask="url(#hero-mask-m)" />
         </svg>
       </div>
 

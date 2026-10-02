@@ -6,7 +6,7 @@ import { serviceById } from "@/content/services";
 import { getDictionary } from "@/i18n/dictionary";
 import type { Locale } from "@/lib/i18n";
 
-export function ReviewCard({ r, locale, className }: { r: Review; locale: Locale; className?: string }) {
+export function ReviewCard({ r, locale, className, area }: { r: Review; locale: Locale; className?: string; area?: string }) {
   const d = getDictionary(locale);
   const date = new Intl.DateTimeFormat(locale === "sr" ? "sr-Latn-RS" : "en-GB", { month: "long", year: "numeric" }).format(new Date(r.date));
   return (
@@ -28,7 +28,7 @@ export function ReviewCard({ r, locale, className }: { r: Review; locale: Locale
         <span>
           <span className="block font-medium">{r.name}</span>
           <span className="text-muted">
-            {r.area} · {serviceById(r.service).short[locale]} · {stylistById(r.stylist)?.name.split(" ")[0]}
+            {area ? `${area} · ${serviceById(r.service).short[locale]}` : `${r.area} · ${serviceById(r.service).short[locale]} · ${stylistById(r.stylist)?.name.split(" ")[0]}`}
           </span>
         </span>
       </figcaption>
