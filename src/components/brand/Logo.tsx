@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { LOGO } from "./logo-paths";
 
 /**
- * Ondine wordmark. The O is the mark: a Didone "O" crossed by a single hairline
+ * Ondine wordmark. The O is the mark: a serif "O" crossed by a single hairline
  * wave (ondine = water spirit, hair in motion). The wave draws itself on load.
  */
 export function Logo({ className, animate = false, title = "Ondine" }: { className?: string; animate?: boolean; title?: string }) {
@@ -26,7 +26,7 @@ export function Logo({ className, animate = false, title = "Ondine" }: { classNa
 /** The O + wave on its own (favicon, badges, loaders). */
 export function Mark({ className, animate = false }: { className?: string; animate?: boolean }) {
   return (
-    <svg viewBox="-230 -60 1942 1640" className={clsx("block", className)} aria-hidden fill="currentColor">
+    <svg viewBox={`${LOGO.oWidth / 2 - 971} -60 1942 1640`} className={clsx("block", className)} aria-hidden fill="currentColor">
       <path d={LOGO.o} />
       <path
         d={LOGO.wave}

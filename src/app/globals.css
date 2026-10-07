@@ -98,7 +98,7 @@
   --color-accent-fg: var(--accent-fg);
 
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-bodoni), "Didot", "Bodoni 72", Georgia, serif;
+  --font-serif: var(--font-playfair), Georgia, serif;
 
   --ease-out-expo: var(--ease-out-expo);
   --ease-in-out-quart: var(--ease-in-out-quart);
@@ -162,44 +162,45 @@ html.lenis body {
 }
 
 @utility font-serif {
-  font-family: var(--font-bodoni), "Didot", "Bodoni 72", Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-variant-numeric: lining-nums;
+  font-weight: 500;
 }
 
 @utility t-display {
-  font-family: var(--font-bodoni), Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-variant-numeric: lining-nums;
   font-size: clamp(3.6rem, 13vw, 15rem);
   line-height: 0.84;
   letter-spacing: -0.035em;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 @utility t-h1 {
-  font-family: var(--font-bodoni), Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-variant-numeric: lining-nums;
   font-size: clamp(3rem, 8.4vw, 9.5rem);
   line-height: 0.9;
   letter-spacing: -0.03em;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 @utility t-h2 {
-  font-family: var(--font-bodoni), Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-variant-numeric: lining-nums;
   font-size: clamp(2.4rem, 5.4vw, 6rem);
   line-height: 0.95;
   letter-spacing: -0.025em;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 @utility t-h3 {
-  font-family: var(--font-bodoni), Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-variant-numeric: lining-nums;
   font-size: clamp(1.6rem, 2.4vw, 2.5rem);
   line-height: 1.05;
   letter-spacing: -0.015em;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 @utility t-eyebrow {

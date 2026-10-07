@@ -34,7 +34,7 @@ type Props = {
 };
 
 /**
- * The hero: a giant Didone masthead is cut out of the paper, with a slow-motion
+ * The hero: a giant serif masthead is cut out of the paper, with a slow-motion
  * hair video playing inside the letters. Scrolling flies the camera into the "I"
  * until the video fills the screen. The intro is CSS-only (LCP-safe); the
  * scroll scene is GSAP, skipped for reduced motion.
@@ -100,7 +100,7 @@ export function HeroMasthead(p: Props) {
     { scope: root },
   );
 
-  // A preview's name is set in the same Didone, sized to fill the masthead's width
+  // A preview's name is set in the same serif, sized to fill the masthead's width
   const nameSize = p.name ? Math.min(2100, MASTHEAD.width / (p.name.length * 0.66)) : 0;
   const letters = p.name ? (
     <text
@@ -108,7 +108,7 @@ export function HeroMasthead(p: Props) {
       y={MASTHEAD.height / 2}
       textAnchor="middle"
       dominantBaseline="central"
-      fontFamily="var(--font-bodoni), Didot, Georgia, serif"
+      fontFamily="var(--font-playfair), Georgia, serif"
       fontSize={nameSize}
       fill="#000"
       stroke="#000"

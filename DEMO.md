@@ -7,10 +7,10 @@
 - Repo: https://github.com/dbs-media-demos/ondine-salon-demo (public, branch main)
 - Folder: DBS Media Portfolio/Demo Websites/salon
 - Stack: Next.js 16.3.6, React 19.2.8, Tailwind v4, GSAP (ScrollTrigger, SplitText), Lenis
-- Palette: #0F0B0C ink · #F4EDE4 cream · #E8D3C7 blush · #C6A08A nude · #5A1A29 wine · #B89468 champagne   Fonts: Bodoni Moda (self-hosted subset, optical-size axis), Hanken Grotesk
+- Palette: #0F0B0C ink · #F4EDE4 cream · #E8D3C7 blush · #C6A08A nude · #5A1A29 wine · #B89468 champagne   Fonts: Playfair Display 500 + italic (self-hosted subset; replaced Bodoni Moda on 2026-10-07, its hairlines were too thin), Hanken Grotesk
 - Pages: 38 routes (19 per language) + 404. Home, Services + 7 service pages (cuts, colour & balayage, blow-dry & styling, keratin & treatments, nails, brows & lashes, bridal), Prices, Lookbook, Team, About, Gift cards, Reviews, FAQ, Booking, Contact, Privacy.
 - Signature features:
-  - Masthead hero: a slow-motion hair video plays inside a giant Didone "ONDINE"; scrolling flies the camera into the "I" until the video fills the screen (on phones the masthead runs up the edge like a magazine spine).
+  - Masthead hero: a slow-motion hair video plays inside a giant serif "ONDINE"; scrolling flies the camera into the "I" until the video fills the screen (on phones the masthead runs up the edge like a magazine spine).
   - Lookbook "Issue 07": 12 pinned full-screen spreads. Photos open from a small window, oversized italic titles rise letter by letter, an issue counter ticks, and each look links to the service behind it, morphing via React ViewTransition.
   - Real HTML price list (cenovnik) in RSD: 7 categories with scroll-spy tabs, a short/medium/long hair-length switch that rolls prices like an odometer, instant search with highlighting, and "Book" on every row. The whole list is also in the schema as an OfferCatalog.
   - Stylist cards: hover or tap fans the portrait out into four photos of that stylist's work, with specialties and "Book with Mila".
@@ -21,7 +21,7 @@
 ## Portfolio copy
 EN title: Ondine — hair & beauty atelier, Belgrade
 EN one-liner (≤ 120 chars): An editorial salon site: a video-in-the-letters hero, a scroll-driven lookbook and a price list Google can read.
-EN summary (2–3 sentences): A concept site for a premium hair and beauty atelier in Dorćol, Belgrade, built like a fashion magazine: a slow-motion video inside a giant Didone masthead, a pinned full-screen lookbook and stylist cards that fan out into their work. Instead of the usual JPG price menu, every price is real, searchable HTML that updates by hair length and feeds structured data. Bilingual (Serbian/English), with booking in four steps.
+EN summary (2–3 sentences): A concept site for a premium hair and beauty atelier in Dorćol, Belgrade, built like a fashion magazine: a slow-motion video inside a giant serif masthead, a pinned full-screen lookbook and stylist cards that fan out into their work. Instead of the usual JPG price menu, every price is real, searchable HTML that updates by hair length and feeds structured data. Bilingual (Serbian/English), with booking in four steps.
 SR title: Ondine — atelje za kosu i lepotu, Beograd
 SR one-liner: Editorijalni sajt salona: video u slovima, lookbook koji se lista skrolom i cenovnik koji Google može da pročita.
 SR summary: Konceptni sajt za premium frizerski salon u Dorćolu, urađen kao modni magazin: usporeni video unutar ogromnog natpisa, lookbook preko celog ekrana i kartice stilista koje se otvaraju u galeriju radova. Umesto cenovnika u JPG-u, sve cene su pravi tekst koji se pretražuje, menja po dužini kose i šalje Google-u kroz strukturirane podatke. Dvojezičan (srpski/engleski), sa zakazivanjem u četiri koraka.

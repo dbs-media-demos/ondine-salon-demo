@@ -2,10 +2,10 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { LOGO } from "@/components/brand/logo-paths";
 
-// Brand fonts (static instances of Bodoni Moda + Hanken Grotesk), traced into the bundle.
-const [bodoni, bodoniItalic, hanken] = await Promise.all([
-  readFile(new URL("../../../assets/fonts/BodoniModa-96-500.ttf", import.meta.url)),
-  readFile(new URL("../../../assets/fonts/BodoniModa-Italic-96-400.ttf", import.meta.url)),
+// Brand fonts (static instances of Playfair Display + Hanken Grotesk), traced into the bundle.
+const [playfair, playfairItalic, hanken] = await Promise.all([
+  readFile(new URL("../../../assets/fonts/PlayfairDisplay-500.ttf", import.meta.url)),
+  readFile(new URL("../../../assets/fonts/PlayfairDisplay-Italic-400.ttf", import.meta.url)),
   readFile(new URL("../../../assets/fonts/HankenGrotesk-600.ttf", import.meta.url)),
 ]);
 
@@ -33,10 +33,10 @@ export async function GET(req: Request) {
           </svg>
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <div style={{ display: "flex", color: "#5a1a29", fontSize: 18, letterSpacing: 4, textTransform: "uppercase", fontWeight: 600 }}>{eyebrow}</div>
-            <div style={{ display: "flex", color: "#0f0b0c", fontFamily: "Bodoni", fontSize: size, lineHeight: 1.02, letterSpacing: -1 }}>{title}</div>
+            <div style={{ display: "flex", color: "#0f0b0c", fontFamily: "Playfair", fontSize: size, lineHeight: 1.02, letterSpacing: -1 }}>{title}</div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", fontSize: 18, color: "#6b605c" }}>
-            <div style={{ display: "flex", fontFamily: "BodoniItalic", fontSize: 30, color: "#0f0b0c" }}>{sr ? "Kosa koja se kreće." : "Hair that moves."}</div>
+            <div style={{ display: "flex", fontFamily: "PlayfairItalic", fontSize: 30, color: "#0f0b0c" }}>{sr ? "Kosa koja se kreće." : "Hair that moves."}</div>
             <div style={{ display: "flex" }}>Dorćol · {sr ? "Beograd" : "Belgrade"}</div>
           </div>
         </div>
@@ -46,8 +46,8 @@ export async function GET(req: Request) {
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Bodoni", data: bodoni, weight: 500, style: "normal" },
-        { name: "BodoniItalic", data: bodoniItalic, weight: 400, style: "normal" },
+        { name: "Playfair", data: playfair, weight: 500, style: "normal" },
+        { name: "PlayfairItalic", data: playfairItalic, weight: 400, style: "normal" },
         { name: "Hanken", data: hanken, weight: 600, style: "normal" },
       ],
       headers: { "Cache-Control": "public, max-age=86400, s-maxage=31536000" },
