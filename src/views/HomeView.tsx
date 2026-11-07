@@ -357,7 +357,7 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
                   {c.teamTitle}
                 </SplitReveal>
               </div>
-              <Button href={pageHref(locale, "team")} variant="outline" arrow={false} className="phone:min-h-10 phone:whitespace-nowrap phone:px-4 phone:text-[0.82rem]">
+              <Button href={pageHref(locale, "team")} variant="outline" className="phone:min-h-10 phone:whitespace-nowrap phone:px-4 phone:text-[0.82rem] phone:[&>span:last-child]:hidden">
                 {c.teamAll}
               </Button>
             </div>
