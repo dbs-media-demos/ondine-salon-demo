@@ -2,7 +2,8 @@
 
 import { useRef, type CSSProperties, type ElementType, type ReactNode } from "react";
 import clsx from "clsx";
-import { gsap, ScrollTrigger, SplitText, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { prefersReducedMotion, useDesktopMotion } from "@/lib/motion";
+import type { SplitText as SplitTextType } from "@/lib/gsap";
 
 /*
  * Scroll-driven reveals.
@@ -30,12 +31,12 @@ type SplitProps = {
 export function SplitReveal({ children, as: Tag = "h2", className, delay = 0, immediate, stagger = 0.1, id }: SplitProps) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap, SplitText }) => {
       const el = ref.current;
       if (!el || immediate || prefersReducedMotion() || !belowFold(el)) return;
       gsap.set(el, { opacity: 0 });
-      let split: SplitText | null = null;
+      let split: SplitTextType | null = null;
       const io = new IntersectionObserver(
         ([entry]) => {
           if (!entry.isIntersecting) return;
@@ -59,7 +60,7 @@ export function SplitReveal({ children, as: Tag = "h2", className, delay = 0, im
         split?.revert();
       };
     },
-    { scope: ref },
+    ref,
   );
 
   return (
@@ -84,8 +85,8 @@ type RevealProps = {
 export function Reveal({ children, as: Tag = "div", className, delay = 0, y = 40, stagger, immediate, id }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap, ScrollTrigger }) => {
       const el = ref.current;
       if (!el || immediate || prefersReducedMotion() || !belowFold(el)) return;
       const targets = stagger ? Array.from(el.children) : [el];
@@ -98,7 +99,7 @@ export function Reveal({ children, as: Tag = "div", className, delay = 0, y = 40
           gsap.to(targets, { opacity: 1, y: 0, duration: 1.3, delay, stagger: stagger ?? 0, ease: "expo.out", clearProps: "transform" }),
       });
     },
-    { scope: ref },
+    ref,
   );
 
   return (
@@ -112,8 +113,8 @@ export function Reveal({ children, as: Tag = "div", className, delay = 0, y = 40
 export function ScrubWords({ text, className, as: Tag = "p" }: { text: string; className?: string; as?: ElementType }) {
   const ref = useRef<HTMLElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap }) => {
       const el = ref.current;
       if (!el || prefersReducedMotion()) return;
       const words = el.querySelectorAll<HTMLElement>("[data-w]");
@@ -124,7 +125,7 @@ export function ScrubWords({ text, className, as: Tag = "p" }: { text: string; c
         { opacity: 1, ease: "none", stagger: 0.1, scrollTrigger: { trigger: el, start: "top 82%", end: "bottom 50%", scrub: 0.6 } },
       );
     },
-    { scope: ref },
+    ref,
   );
 
   return (
@@ -154,8 +155,8 @@ export function Parallax({
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap }) => {
       const el = ref.current;
       const inner = el?.firstElementChild as HTMLElement | null;
       if (!el || !inner || prefersReducedMotion()) return;
@@ -173,7 +174,7 @@ export function Parallax({
         );
       }
     },
-    { scope: ref },
+    ref,
   );
 
   return (

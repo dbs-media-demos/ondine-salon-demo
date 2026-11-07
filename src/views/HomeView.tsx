@@ -24,7 +24,9 @@ import { railLooks, serviceRows, stylistCards } from "@/lib/view-models";
 import { services } from "@/content/services";
 import { site } from "@/lib/site";
 import { PreviewMap } from "@/components/preview/PreviewMap";
-import { openDays, type Biz } from "@/lib/biz-core";
+import { SnipRule } from "@/components/home/SnipRule";
+import { formatRsd } from "@/content/prices";
+import { num, openDays, type Biz } from "@/lib/biz-core";
 
 const copy = {
   sr: {
@@ -32,6 +34,9 @@ const copy = {
     titleLead: "Kosa koja",
     titleAccent: "se kreće.",
     srTitle: "Ondine, atelje za kosu i lepotu u Dorćolu:",
+    phoneService: "Frizerski salon",
+    phoneTown: "u Dorćolu, Beograd",
+    photoAlt: "Duga bakarna kosa u pokretu",
     after: "Boja, rez i sjaj koji žive van ogledala.",
     afterSub: "Od 2017. u Strahinjića Bana",
     prices: "Pogledaj cenovnik",
@@ -86,6 +91,9 @@ const copy = {
     titleLead: "Hair that",
     titleAccent: "moves.",
     srTitle: "Ondine, a hair and beauty atelier in Dorćol, Belgrade:",
+    phoneService: "Hair & beauty salon",
+    phoneTown: "in Dorćol, Belgrade",
+    photoAlt: "Long copper hair in motion",
     after: "Colour, cut and shine that live beyond the mirror.",
     afterSub: "On Strahinjića Bana since 2017",
     prices: "See the price list",
@@ -158,6 +166,8 @@ function previewCopy(locale: Locale, biz: Biz) {
     ...c,
     eyebrow: sr ? `Atelje za kosu i lepotu — ${biz.area}` : `Hair & beauty atelier — ${biz.area}`,
     srTitle: `${biz.name}:`,
+    // No "in" in Serbian: the CRM's area is in the nominative
+    phoneTown: sr ? biz.area : `in ${biz.area}`,
     afterSub: sr ? "Zakažite termin online" : "Book online",
     manifestoEyebrow: sr ? "Atelje" : "Atelier",
     manifesto: sr
@@ -179,9 +189,14 @@ function previewCopy(locale: Locale, biz: Biz) {
 export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
   const d = getDictionary(locale);
   const c = biz ? previewCopy(locale, biz) : copy[locale];
+  const rating = biz ? biz.rating : site.rating;
+  const reviewsWord = locale === "sr" ? "Google recenzija" : "Google reviews";
+  // The first thing a phone sees. English previews have no dinar prices (see below).
+  const cuts = services[0];
+  const fromPrice = biz && locale === "en" ? undefined : `${cuts.short[locale]} ${d.from} ${formatRsd(cuts.from, locale)}`;
 
   return (
-    <PageShell>
+    <PageShell className="phone:flex phone:flex-col">
       {!biz && (
         <JsonLd
           data={graph(
@@ -204,37 +219,52 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
         pricesLabel={c.prices}
         scrollLabel={c.scroll}
         name={biz?.shortName}
+        phoneService={c.phoneService}
+        phoneTown={c.phoneTown}
+        rating={rating ? { value: rating.value, label: `${num({ lang: locale }, rating.value)} · ${rating.count} ${reviewsWord}` } : undefined}
+        fromPrice={fromPrice}
+        photoAlt={c.photoAlt}
       />
 
       {/* Manifesto */}
-      <section className="theme-cream relative overflow-hidden py-28 md:py-44" aria-label={c.manifestoEyebrow}>
+      <section className="theme-cream relative overflow-hidden py-28 md:py-44 phone:order-9 phone:py-12" aria-label={c.manifestoEyebrow}>
         <div className="wrap relative">
-          <Parallax amount={18} className="absolute -top-10 right-[4%] hidden aspect-[3/4] w-[15vw] md:block">
+          <Parallax amount={18} className="absolute -top-10 right-[4%] hidden aspect-[3/4] w-[15vw] md:block phone:hidden">
             <div className="absolute inset-0">
               <Photo k="interior-arch" alt={locale === "sr" ? "Lučno ogledalo i biljke u salonu" : "Arched mirror and plants in the salon"} sizes="15vw" />
             </div>
           </Parallax>
-          <Parallax amount={24} className="absolute -bottom-24 left-[2%] hidden aspect-[4/5] w-[11vw] md:block">
+          <Parallax amount={24} className="absolute -bottom-24 left-[2%] hidden aspect-[4/5] w-[11vw] md:block phone:hidden">
             <div className="absolute inset-0">
               <Photo k="treat-strands" alt={locale === "sr" ? "Pramenovi kose izbliza" : "Strands of hair up close"} sizes="11vw" />
             </div>
           </Parallax>
-          <p className="t-eyebrow mb-10 text-wine">{c.manifestoEyebrow}</p>
-          <ScrubWords text={c.manifesto} className="max-w-[22ch] font-serif text-[clamp(2rem,4.6vw,4.9rem)] leading-[1.04] tracking-[-0.02em] md:ml-[12%]" />
-          <Reveal stagger={0.12} className="mt-20 grid max-w-4xl grid-cols-3 gap-6 md:ml-[12%]">
+          <p className="t-eyebrow mb-10 text-wine phone:mb-3">{c.manifestoEyebrow}</p>
+          <ScrubWords text={c.manifesto} className="max-w-[22ch] font-serif text-[clamp(2rem,4.6vw,4.9rem)] leading-[1.04] tracking-[-0.02em] md:ml-[12%] phone:ml-0 phone:max-w-[34rem] phone:text-[1.5rem] phone:leading-[1.2] phone:tracking-[-0.01em]" />
+          <p className="t-eyebrow mt-4 hidden text-muted phone:block">{c.afterSub}</p>
+          {/* The same two photos desktop floats beside the text */}
+          <div className="mt-6 hidden grid-cols-[1.25fr_1fr] gap-3 phone:grid">
+            <div className="relative aspect-[3/4] overflow-hidden">
+              <Photo k="interior-arch" alt={locale === "sr" ? "Lučno ogledalo i biljke u salonu" : "Arched mirror and plants in the salon"} sizes="(min-width: 768px) 30vw, 55vw" />
+            </div>
+            <div className="relative aspect-[4/5] self-end overflow-hidden">
+              <Photo k="treat-strands" alt={locale === "sr" ? "Pramenovi kose izbliza" : "Strands of hair up close"} sizes="(min-width: 768px) 30vw, 45vw" />
+            </div>
+          </div>
+          <Reveal stagger={0.12} className="mt-20 grid max-w-4xl grid-cols-3 gap-6 md:ml-[12%] phone:ml-0 phone:mt-6 phone:gap-4">
             {c.stats.map((s) => (
-              <div key={s.l} className="border-t border-line pt-5">
-                <p className="font-serif text-[clamp(2.6rem,5vw,4.6rem)] leading-none">
+              <div key={s.l} className="border-t border-line pt-5 phone:pt-2.5">
+                <p className="font-serif text-[clamp(2.6rem,5vw,4.6rem)] leading-none phone:text-[1.9rem]">
                   <CountUp value={s.v} locale={locale} />
                 </p>
-                <p className="mt-2 text-[0.88rem] text-muted">{s.l}</p>
+                <p className="mt-2 text-[0.88rem] text-muted phone:mt-1 phone:text-[0.78rem] phone:leading-snug">{s.l}</p>
               </div>
             ))}
           </Reveal>
         </div>
       </section>
 
-      <div className="theme-ink border-y border-line py-6" aria-hidden>
+      <div className="theme-ink border-y border-line py-6 phone:hidden" aria-hidden>
         <Marquee duration={45}>
           {services.map((s) => (
             <span key={s.id} className="flex items-center font-serif text-[clamp(2.2rem,4vw,3.8rem)] italic">
@@ -248,16 +278,16 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
       </div>
 
       {/* Services index */}
-      <section className="theme-cream py-24 md:py-36" aria-labelledby="services-title">
+      <section className="theme-cream py-24 md:py-36 phone:order-6 phone:py-12" aria-labelledby="services-title">
         <div className="wrap">
-          <div className="mb-14 flex flex-col justify-between gap-6 md:mb-20 md:flex-row md:items-end">
+          <div className="mb-14 flex flex-col justify-between gap-6 md:mb-20 md:flex-row md:items-end phone:mb-5 phone:flex-col phone:items-start phone:gap-3">
             <div>
-              <p className="t-eyebrow mb-6 text-wine">{c.servicesEyebrow}</p>
-              <SplitReveal id="services-title" className="t-h2 max-w-[14ch]">
+              <p className="t-eyebrow mb-6 text-wine phone:mb-2">{c.servicesEyebrow}</p>
+              <SplitReveal id="services-title" className="t-h2 max-w-[14ch] phone:max-w-none">
                 {c.servicesTitle}
               </SplitReveal>
             </div>
-            <Button href={pageHref(locale, "services")} variant="outline">
+            <Button href={pageHref(locale, "services")} variant="outline" className="phone:min-h-11 phone:px-5">
               {d.seeAll}
             </Button>
           </div>
@@ -272,36 +302,43 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
         allHref={pageHref(locale, "lookbook")}
         allLabel={c.railAll}
         cursorLabel={d.view}
+        className="phone:order-7"
       />
 
-      <VideoWindow src="/video/curls.mp4" poster="/video/curls.jpg" label={c.videoLabel}>
+      <VideoWindow src="/video/curls.mp4" poster="/video/curls.jpg" label={c.videoLabel} className="phone:order-8">
         <p className="t-display max-w-[12ch]">{c.video}</p>
       </VideoWindow>
 
       {!(biz && locale === "en") && (
         <>
         {/* Prices preview */}
-        <section className="theme-cream py-24 md:py-36" aria-labelledby="prices-title">
-          <div className="wrap grid gap-14 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="lg:sticky lg:top-28 lg:self-start">
-              <p className="t-eyebrow mb-6 text-wine">{c.pricesEyebrow}</p>
+        <section className="theme-cream py-24 md:py-36 phone:order-2 phone:pb-9 phone:pt-5" aria-labelledby="prices-title">
+          <div className="wrap grid gap-14 lg:grid-cols-[0.8fr_1.2fr] phone:block">
+            <div className="lg:sticky lg:top-28 lg:self-start phone:static">
+              <SnipRule />
+              <p className="t-eyebrow mb-6 text-wine phone:mb-2">{c.pricesEyebrow}</p>
               <SplitReveal id="prices-title" className="t-h2">
                 {c.pricesTitle}
               </SplitReveal>
               <Reveal>
-                <p className="t-lead mt-8 max-w-md text-muted">{c.pricesText}</p>
-                <div className="mt-8">
+                <p className="t-lead mt-8 max-w-md text-muted phone:mt-2 phone:max-w-[34rem] phone:text-[0.92rem] phone:leading-snug">{c.pricesText}</p>
+                <div className="mt-8 phone:hidden">
                   <Button href={pageHref(locale, "prices")}>{c.pricesAll}</Button>
                 </div>
               </Reveal>
-              <Parallax className="mt-12 hidden aspect-[4/3] lg:block" amount={10}>
+              <Parallax className="mt-12 hidden aspect-[4/3] lg:block phone:hidden" amount={10}>
                 <div className="absolute inset-0">
                   <Photo k="product-pair" alt={locale === "sr" ? "Profesionalni šampon i regenerator" : "Professional shampoo and conditioner"} sizes="30vw" />
                 </div>
               </Parallax>
             </div>
-            <Reveal>
+            <Reveal className="phone:mt-3">
               <PriceList locale={locale} compact />
+              <div className="mt-4 hidden phone:block">
+                <Button href={pageHref(locale, "prices")} className="w-full">
+                  {c.pricesAll}
+                </Button>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -311,20 +348,20 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
       {!biz && (
         <>
         {/* Team */}
-        <section className="theme-cream border-t border-line py-24 md:py-36" aria-labelledby="team-title">
+        <section className="theme-cream border-t border-line py-24 md:py-36 phone:order-3 phone:border-t-0 phone:pb-9 phone:pt-0" aria-labelledby="team-title">
           <div className="wrap">
-            <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end phone:mb-4 phone:flex-row phone:items-end phone:gap-3">
               <div>
-                <p className="t-eyebrow mb-6 text-wine">{c.teamEyebrow}</p>
-                <SplitReveal id="team-title" className="t-h2 max-w-[14ch]">
+                <p className="t-eyebrow mb-6 text-wine phone:mb-2">{c.teamEyebrow}</p>
+                <SplitReveal id="team-title" className="t-h2 max-w-[14ch] phone:max-w-[11ch]">
                   {c.teamTitle}
                 </SplitReveal>
               </div>
-              <Button href={pageHref(locale, "team")} variant="outline">
+              <Button href={pageHref(locale, "team")} variant="outline" arrow={false} className="phone:min-h-10 phone:whitespace-nowrap phone:px-4 phone:text-[0.82rem]">
                 {c.teamAll}
               </Button>
             </div>
-            <Reveal stagger={0.1} className="grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5">
+            <Reveal stagger={0.1} className="no-scrollbar grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5 phone:-mx-[var(--gutter)] phone:flex phone:snap-x phone:snap-mandatory phone:scroll-pl-[var(--gutter)] phone:items-start phone:gap-x-3 phone:overflow-x-auto phone:px-[var(--gutter)]">
               {stylistCards(locale).map((s, i) => (
                 <StylistCard key={s.id} s={s} index={i} tapHint={c.teamHint} />
               ))}
@@ -334,9 +371,9 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
         </>
       )}
 
-      <ReviewsSection locale={locale} biz={biz} />
-      {!biz && <InstaGrid locale={locale} />}
-      {biz ? <PreviewMap biz={biz} locale={locale} /> : <VisitSection locale={locale} />}
+      <ReviewsSection locale={locale} biz={biz} className="phone:order-4" />
+      {!biz && <InstaGrid locale={locale} className="phone:order-10" />}
+      {biz ? <PreviewMap biz={biz} locale={locale} className="phone:order-5" /> : <VisitSection locale={locale} className="phone:order-5" />}
     </PageShell>
   );
 }

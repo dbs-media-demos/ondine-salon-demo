@@ -99,7 +99,7 @@ export function TeamView({ locale }: { locale: Locale }) {
         <h2 id="team-grid" className="sr-only">
           {c.title}
         </h2>
-        <div className="wrap grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="wrap no-scrollbar grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-5 phone:flex phone:max-w-none phone:snap-x phone:snap-mandatory phone:scroll-pl-[var(--gutter)] phone:items-start phone:gap-x-3 phone:overflow-x-auto">
           {cards.map((s, i) => (
             <StylistCard key={s.id} s={s} index={i} tapHint={c.hint} />
           ))}
@@ -107,7 +107,7 @@ export function TeamView({ locale }: { locale: Locale }) {
       </section>
 
       {team.map((m, i) => (
-        <section key={m.id} className={clsx("py-24 md:py-32", i % 2 ? "theme-blush" : "theme-cream border-t border-line")} aria-labelledby={`bio-${m.id}`}>
+        <section key={m.id} className={clsx("py-24 md:py-32 phone:py-12", i % 2 ? "theme-blush" : "theme-cream border-t border-line")} aria-labelledby={`bio-${m.id}`}>
           <div className="wrap grid items-center gap-12 md:grid-cols-[0.8fr_1.2fr] md:gap-20">
             <Reveal className={clsx("grid grid-cols-2 gap-3", i % 2 && "md:order-2")}>
               <div className="relative col-span-2 aspect-[4/3] overflow-hidden">

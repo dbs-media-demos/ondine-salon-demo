@@ -105,3 +105,5 @@ All photos are from [Unsplash](https://unsplash.com/license) (free to use under 
 | video/colour.mp4 | https://www.pexels.com/video/7575387/ | ArtHouse Studio |
 | video/cut.mp4 | https://www.pexels.com/video/7686503/ | ArtHouse Studio |
 | video/curls.mp4 | https://www.pexels.com/video/7626890/ | Mikhail Nilov |
+
+`hero-phone-*.avif` / `hero-phone-*.webp` are resized copies of `look-red-wind.jpg` for the phone hero (`scripts/build-phone-hero.mjs`).

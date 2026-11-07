@@ -122,13 +122,13 @@ export function AboutView({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      <Parallax className="h-[80vh]" amount={20} reveal={false}>
+      <Parallax className="h-[80vh] phone:h-[46svh]" amount={20} reveal={false}>
         <div className="absolute inset-0">
           <Photo k="interior-room" alt={alt("Svetao enterijer salona sa pet stolica", "The bright salon interior with five chairs")} sizes="100vw" />
         </div>
       </Parallax>
 
-      <section className="theme-ink py-24 md:py-36" aria-labelledby="values">
+      <section className="theme-ink py-24 md:py-36 phone:py-12" aria-labelledby="values">
         <div className="wrap">
           <SplitReveal id="values" className="t-h2 mb-16">
             {c.values_t}
@@ -145,7 +145,7 @@ export function AboutView({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      <section className="theme-cream py-24 md:py-36" aria-label="Timeline">
+      <section className="theme-cream py-24 md:py-36 phone:py-12" aria-label="Timeline">
         <div className="wrap">
           <ol className="border-t border-line">
             {c.timeline.map(([y, t]) => (
@@ -158,7 +158,7 @@ export function AboutView({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      <div className="theme-blush py-8" aria-hidden>
+      <div className="theme-blush py-8 phone:hidden" aria-hidden>
         <Marquee duration={50}>
           {["Dorćol", "Balayage", "Bob", "Keratin", "Gloss", "Nude", "Lash lift", "Chignon"].map((w) => (
             <span key={w} className="px-10 font-serif text-[clamp(3rem,7vw,6rem)] italic">
@@ -168,7 +168,7 @@ export function AboutView({ locale }: { locale: Locale }) {
         </Marquee>
       </div>
 
-      <section className="theme-cream py-24 md:py-36" aria-labelledby="space">
+      <section className="theme-cream py-24 md:py-36 phone:py-12" aria-labelledby="space">
         <div className="wrap">
           <SplitReveal id="space" className="t-h2 mb-14">
             {c.space}

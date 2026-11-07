@@ -288,7 +288,7 @@ export function ContactView({ locale }: { locale: Locale }) {
           </div>
         </div>
       </PageHero>
-      <section className="theme-cream border-t border-line py-24 md:py-32">
+      <section className="theme-cream border-t border-line py-24 md:py-32 phone:py-12">
         <div className="wrap grid gap-16 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <SplitReveal className="t-h2 mb-12">{sr ? "Pošaljite poruku" : "Send a message"}</SplitReveal>

@@ -283,7 +283,7 @@ function Flow({ locale, initial }: { locale: Locale; initial: Initial }) {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] phone:grid-cols-[minmax(0,1fr)]">
       <div ref={panel}>
         {/* Progress */}
         <ol className="mb-10 grid grid-cols-4 gap-2" aria-label={t.stepOf(step + 1, 4)}>

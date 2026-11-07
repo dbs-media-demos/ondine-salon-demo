@@ -1,6 +1,6 @@
 /**
  * English previews: reviews lose the concept salon's stylists (their names) so they read as the
- * business's own sample reviews. Keys are the concept site's text fragments (applied by preview/Translate).
+ * business's own sample reviews. Keys are the concept site's text fragments (applied by ReviewCard, in the server render).
  */
 export const enPreview: Record<string, string> = {
   "After three salons and brassy highlights, Mila got me back to a cool blonde in two sessions. For the first time, two months of regrowth looked intentional.":

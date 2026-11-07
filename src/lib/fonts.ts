@@ -6,7 +6,8 @@ import localFont from "next/font/local";
  * - Playfair Display: static wght 500 roman + italic (replaced Bodoni Moda, whose
  *   hairlines all but vanished at display sizes).
  * - Hanken Grotesk: weight axis limited to 400–600.
- * ~45 KB for all three files.
+ * ~45 KB for all three files. Phones use the system sans for body text (globals.css) and
+ * only ever fetch the two Playfair files, so Hanken isn't preloaded.
  */
 export const playfair = localFont({
   src: [
@@ -23,6 +24,7 @@ export const hanken = localFont({
   src: [{ path: "../app/fonts/hanken-grotesk-400-600.woff2", weight: "400 600", style: "normal" }],
   variable: "--font-hanken",
   display: "swap",
+  preload: false,
   fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 

@@ -96,22 +96,22 @@ export function LookbookView({ locale }: { locale: Locale }) {
           image: looks.map((l) => ({ "@type": "ImageObject", contentUrl: absoluteUrl(img[l.image].src), name: l.title[locale], description: l.alt[locale] })),
         })}
       />
-      <section data-header="dark" className="theme-ink relative flex min-h-[100svh] flex-col justify-end overflow-hidden pb-16 pt-[calc(var(--header-h)+2.5rem)]">
+      <section data-header="dark" className="theme-ink relative flex min-h-[100svh] flex-col justify-end overflow-hidden pb-16 pt-[calc(var(--header-h)+2.5rem)] phone:min-h-0 phone:pb-10">
         <div className="wrap">
           <Breadcrumbs
-            className="anim-fade mb-14"
+            className="anim-fade mb-14 phone:mb-6"
             items={[
               { name: d.breadcrumbHome, url: pageHref(locale, "home") },
               { name: c.title, url },
             ]}
           />
-          <p className="t-eyebrow anim-fade mb-8 text-champagne">{c.issue}</p>
+          <p className="t-eyebrow anim-fade mb-8 text-champagne phone:mb-3">{c.issue}</p>
           <h1 className="t-display anim-heading max-w-[11ch]" style={{ ["--d" as string]: "0.1s" }}>
             {c.h1}
           </h1>
-          <div className="anim-fade mt-10 flex items-end justify-between gap-6" style={{ ["--d" as string]: "0.4s" }}>
+          <div className="anim-fade mt-10 flex items-end justify-between gap-6 phone:mt-4" style={{ ["--d" as string]: "0.4s" }}>
             <p className="t-lead max-w-md text-muted">{c.lead}</p>
-            <span aria-hidden className="t-eyebrow hidden animate-bounce text-champagne md:block">
+            <span aria-hidden className="t-eyebrow hidden animate-bounce text-champagne md:block phone:hidden">
               ↓
             </span>
           </div>

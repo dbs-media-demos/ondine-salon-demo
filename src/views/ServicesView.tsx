@@ -98,7 +98,7 @@ export function ServicesView({ locale }: { locale: Locale }) {
         {services.map((s, i) => {
           const flip = i % 2 === 1;
           return (
-            <section key={s.id} className="border-t border-line py-20 md:py-32" aria-labelledby={`svc-${s.id}`}>
+            <section key={s.id} className="border-t border-line py-20 md:py-32 phone:py-10" aria-labelledby={`svc-${s.id}`}>
               <div className={clsx("wrap grid items-center gap-10 md:grid-cols-2 md:gap-20")}>
                 <Link href={serviceHref(locale, s.slug)} data-cursor={d.view} className={clsx("group block", flip && "md:order-2")} aria-label={s.title[locale]} tabIndex={-1}>
                   <Parallax className="aspect-[4/5]" amount={14}>

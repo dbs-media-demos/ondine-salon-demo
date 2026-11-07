@@ -94,6 +94,8 @@ export function Header(p: Props) {
     };
   }, [open]);
 
+  // Phones: the homepage opens on a dark photo, so the transparent header starts light (from the server render, so it never flashes)
+  const overPhoto = pathname === p.homeHref || /^(\/en)?\/for\//.test(pathname);
   const langHref = p.altMap[pathname] ?? p.otherHome;
   const other = p.locale === "sr" ? "EN" : "SR";
 
@@ -103,8 +105,9 @@ export function Header(p: Props) {
         className={clsx(
           "fixed inset-x-0 top-0 z-[130] transition-[transform,background-color,box-shadow] duration-700 ease-[var(--ease-out-expo)]",
           hidden && !open ? "-translate-y-full" : "translate-y-0",
-          scrolled && !open ? "bg-cream/88 shadow-[0_1px_0_rgba(15,11,12,0.08)] backdrop-blur-md" : "bg-transparent",
+          scrolled && !open ? "bg-cream/88 shadow-[0_1px_0_rgba(15,11,12,0.08)] backdrop-blur-md phone:bg-cream phone:backdrop-blur-none" : "bg-transparent",
           open || (onDark && !scrolled) ? "text-cream" : "text-ink",
+          overPhoto && !scrolled && "phone:text-cream",
         )}
       >
         <div className="wrap flex h-[var(--header-h)] items-center justify-between gap-6">
@@ -147,7 +150,7 @@ export function Header(p: Props) {
             >
               {other}
             </Link>
-            <Magnetic className="hidden md:inline-block">
+            <Magnetic className="hidden md:inline-block phone:hidden">
               <Link
                 href={p.bookHref}
                 className={clsx(

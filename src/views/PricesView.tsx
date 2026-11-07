@@ -82,7 +82,7 @@ export function PricesView({ locale }: { locale: Locale }) {
           <PriceList locale={locale} />
         </div>
       </section>
-      <section className="theme-cream border-t border-line py-24 md:py-32">
+      <section className="theme-cream border-t border-line py-24 md:py-32 phone:py-12">
         <div className="wrap grid gap-12 lg:grid-cols-[0.6fr_1.4fr]">
           <SplitReveal className="t-h2">{c.faq}</SplitReveal>
           <FaqList items={faq} />

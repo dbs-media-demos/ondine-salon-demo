@@ -133,16 +133,16 @@ export function PriceList({ locale, compact = false, simple = false, only }: { l
       <div
         className={clsx(
           "z-30 -mx-[var(--gutter)] border-b border-line bg-bg/92 px-[var(--gutter)] backdrop-blur-md",
-          full && "sticky top-0 pt-3",
+          full && "sticky top-0 pt-3 phone:static",
         )}
       >
-        <div className="flex flex-col gap-4 pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <fieldset className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-4 pb-4 lg:flex-row lg:items-center lg:justify-between phone:flex-col phone:items-stretch phone:gap-3 phone:pb-3">
+          <fieldset className="flex flex-wrap items-center gap-3 phone:gap-2">
             <legend className="sr-only">{c.length}</legend>
             <span className="t-eyebrow text-muted" aria-hidden>
               {c.length}
             </span>
-            <div className="relative grid grid-cols-3 rounded-full border border-line p-1">
+            <div className="relative grid grid-cols-3 rounded-full border border-line p-1 phone:w-full">
               <span
                 aria-hidden
                 className="absolute bottom-1 top-1 w-[calc((100%-0.5rem)/3)] rounded-full bg-ink transition-transform duration-500 ease-[var(--ease-out-expo)]"
@@ -153,7 +153,7 @@ export function PriceList({ locale, compact = false, simple = false, only }: { l
                   <input type="radio" name={`len-${compact ? "c" : "f"}`} value={l} checked={length === l} onChange={() => setLength(l)} className="peer sr-only" />
                   <span
                     className={clsx(
-                      "flex min-h-10 items-center justify-center gap-2 rounded-full px-4 text-[0.88rem] transition-colors duration-500 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-wine",
+                      "flex min-h-10 items-center justify-center gap-2 rounded-full px-4 text-[0.88rem] transition-colors duration-500 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-wine phone:px-2",
                       length === l ? "text-cream" : "text-fg",
                     )}
                   >
@@ -165,7 +165,7 @@ export function PriceList({ locale, compact = false, simple = false, only }: { l
             </div>
           </fieldset>
           {full && (
-            <label className="relative flex min-h-11 items-center rounded-full border border-line pl-11 pr-3 focus-within:border-fg lg:w-[22rem]">
+            <label className="relative flex min-h-11 items-center rounded-full border border-line pl-11 pr-3 focus-within:border-fg lg:w-[22rem] phone:w-full">
               <span className="sr-only">{c.search}</span>
               <svg aria-hidden viewBox="0 0 24 24" className="absolute left-4 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="11" cy="11" r="7" />
@@ -228,15 +228,15 @@ export function PriceList({ locale, compact = false, simple = false, only }: { l
 
       <div className={clsx(full && "mt-6")}>
         {cats.map((p) => (
-          <section key={p.id} id={`cat-${p.id}`} data-price-cat={p.id} aria-labelledby={compact ? undefined : `cat-h-${p.id}`} className={clsx(full && "pb-12 pt-10", simple && "pt-10")}>
+          <section key={p.id} id={`cat-${p.id}`} data-price-cat={p.id} aria-labelledby={compact ? undefined : `cat-h-${p.id}`} className={clsx(full && "pb-12 pt-10 phone:pb-5 phone:pt-5", simple && "pt-10 phone:pt-6")}>
             {full && (
-              <h2 id={`cat-h-${p.id}`} className="t-h2 mb-6 flex items-baseline gap-4">
+              <h2 id={`cat-h-${p.id}`} className="t-h2 mb-6 flex items-baseline gap-4 phone:mb-3">
                 {p.name[locale]}
                 <span className="t-eyebrow text-muted">{String(p.items.length).padStart(2, "0")}</span>
               </h2>
             )}
             {simple && (
-              <h3 id={`cat-h-${p.id}`} className="t-h3 mb-5">
+              <h3 id={`cat-h-${p.id}`} className="t-h3 mb-5 phone:mb-3">
                 {p.name[locale]}
               </h3>
             )}
@@ -244,10 +244,10 @@ export function PriceList({ locale, compact = false, simple = false, only }: { l
               {p.items.map((i) => (
                 <li
                   key={i.id}
-                  className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 border-b border-line py-5 transition-colors duration-500 hover:bg-surface/60 md:grid-cols-[1fr_6rem_11rem_auto] md:px-3"
+                  className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 border-b border-line py-5 transition-colors duration-500 hover:bg-surface/60 md:grid-cols-[1fr_6rem_11rem_auto] md:px-3 phone:relative phone:grid-cols-[1fr_auto] phone:items-baseline phone:gap-x-3 phone:gap-y-0 phone:px-0 phone:py-2"
                 >
-                  <div className="col-span-2 md:col-span-1">
-                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[1.08rem] font-medium">
+                  <div className="col-span-2 md:col-span-1 phone:col-span-1 phone:min-w-0">
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[1.08rem] font-medium phone:gap-x-2 phone:text-[0.96rem] phone:leading-snug">
                       <Highlight text={i.name[locale]} q={q} />
                       {i.popular && full && (
                         <span className="t-eyebrow rounded-full bg-blush px-2 py-1 text-[0.6rem] text-wine">★ {c.popular}</span>
@@ -256,15 +256,16 @@ export function PriceList({ locale, compact = false, simple = false, only }: { l
                         <span className="t-eyebrow text-[0.6rem] text-muted">{lengthLabels[length][locale]}</span>
                       )}
                     </p>
-                    {i.note && <p className="mt-1 text-[0.9rem] text-muted">{i.note[locale]}</p>}
+                    {i.note && <p className="mt-1 text-[0.9rem] text-muted phone:mt-0 phone:text-[0.78rem] phone:leading-snug">{i.note[locale]}</p>}
                   </div>
-                  <p className="text-[0.88rem] text-muted md:text-right">
+                  <p className="text-[0.88rem] text-muted md:text-right phone:col-start-1 phone:row-start-2 phone:text-left phone:text-[0.78rem]">
                     {i.duration} min
                   </p>
-                  <p className="text-right font-serif text-[1.45rem] leading-none md:col-auto">{show(i.price, i.from)}</p>
+                  <p className="text-right font-serif text-[1.45rem] leading-none md:col-auto phone:col-start-2 phone:row-start-1 phone:whitespace-nowrap phone:text-[1.14rem]">{show(i.price, i.from)}</p>
                   <Link
                     href={bookingHref(locale, { service: i.id })}
-                    className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-full border border-line px-5 text-[0.88rem] font-medium transition-colors duration-500 hover:border-wine hover:bg-wine hover:text-cream md:col-span-1"
+                    prefetch={false}
+                    className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-full border border-line px-5 text-[0.88rem] font-medium transition-colors duration-500 hover:border-wine hover:bg-wine hover:text-cream md:col-span-1 phone:static phone:col-span-1 phone:col-start-2 phone:row-start-2 phone:min-h-0 phone:justify-end phone:border-0 phone:p-0 phone:text-[0.8rem] phone:text-wine phone:after:absolute phone:after:inset-0 phone:hover:bg-transparent"
                     aria-label={`${c.book}: ${i.name[locale]}`}
                   >
                     {c.book}

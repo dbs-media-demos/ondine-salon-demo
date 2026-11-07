@@ -2,20 +2,22 @@
 
 import Image from "next/image";
 import { useRef, type ReactNode } from "react";
-import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import clsx from "clsx";
+import { prefersReducedMotion, useDesktopMotion } from "@/lib/motion";
 
 /**
  * A small rounded window onto a video loop that opens to full-bleed as you
  * scroll, while the headline scales down behind it. The video only loads
  * and plays while on screen (and never with reduced motion / Save-Data).
+ * Phones get the same words over a still.
  */
-export function VideoWindow({ src, poster, children, label }: { src: string; poster: string; children: ReactNode; label: string }) {
+export function VideoWindow({ src, poster, children, label, className }: { src: string; poster: string; children: ReactNode; label: string; className?: string }) {
   const root = useRef<HTMLElement>(null);
   const win = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap }) => {
       const el = root.current;
       const w = win.current;
       const v = video.current;
@@ -54,14 +56,14 @@ export function VideoWindow({ src, poster, children, label }: { src: string; pos
         .fromTo("[data-vw-text]", { color: "#0f0b0c" }, { color: "#f4ede4", duration: 0.25 }, 0.35);
       return () => io?.disconnect();
     },
-    { scope: root },
+    root,
   );
 
   return (
-    <section ref={root} aria-label={label} className="theme-cream relative h-[100svh] overflow-hidden">
+    <section ref={root} aria-label={label} className={clsx("theme-cream relative h-[100svh] overflow-hidden phone:h-[24rem]", className)}>
       <div ref={win} className="absolute inset-0 overflow-hidden [clip-path:inset(0_0_0_0)]">
         <Image src={poster} alt="" fill sizes="100vw" quality={60} className="object-cover" />
-        <video ref={video} muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        <video ref={video} muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover phone:hidden" />
         <div className="absolute inset-0 bg-ink/40" />
       </div>
       <div data-vw-text className="pointer-events-none relative z-10 flex h-full items-center justify-center px-[var(--gutter)] text-center text-cream">

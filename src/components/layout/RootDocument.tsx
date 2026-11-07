@@ -3,6 +3,7 @@ import { fontVariables } from "@/lib/fonts";
 import { localeMeta, type Locale } from "@/lib/i18n";
 import { getDictionary } from "@/i18n/dictionary";
 import { SmoothScroll } from "./SmoothScroll";
+import { PhoneMotion } from "./PhoneMotion";
 import { Cursor } from "./Cursor";
 
 /** The <html> document shared by the Serbian and English root layouts. Header, footer and the rest come from SiteChrome. */
@@ -18,6 +19,7 @@ export function RootDocument({ locale, children }: { locale: Locale; children: R
           {d.skip}
         </a>
         <SmoothScroll />
+        <PhoneMotion />
         {children}
         <Cursor />
         <div className="grain" aria-hidden />

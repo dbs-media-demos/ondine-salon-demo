@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ViewTransition, useRef, useState } from "react";
 import clsx from "clsx";
-import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { prefersReducedMotion, useDesktopMotion } from "@/lib/motion";
 
 export type LookSlide = {
   id: string;
@@ -37,8 +37,8 @@ export function LookbookScroller({ looks, labels }: { looks: LookSlide[]; labels
   const root = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap }) => {
       const el = root.current;
       if (!el || prefersReducedMotion()) return;
       el.querySelectorAll<HTMLElement>("[data-spread]").forEach((spread, i) => {
@@ -64,13 +64,13 @@ export function LookbookScroller({ looks, labels }: { looks: LookSlide[]; labels
           .to(img, { scale: 1.1, duration: 0.2 }, 0.8);
       });
     },
-    { scope: root },
+    root,
   );
 
   return (
     <div ref={root} className="theme-ink relative">
       {/* Issue counter */}
-      <div aria-hidden className="pointer-events-none sticky top-0 z-20 h-0">
+      <div aria-hidden className="pointer-events-none sticky top-0 z-20 h-0 phone:hidden">
         <div className="wrap flex justify-end pt-[calc(var(--header-h)+1rem)]">
           <p className="t-eyebrow flex items-center gap-3 text-cream mix-blend-difference">
             {labels.look}
@@ -91,7 +91,7 @@ export function LookbookScroller({ looks, labels }: { looks: LookSlide[]; labels
       {looks.map((l, i) => {
         const layout = LAYOUTS[i % LAYOUTS.length];
         const photo = (
-          <div data-frame className="absolute inset-0 overflow-hidden" style={{ clipPath: layout.end }}>
+          <div data-frame className="absolute inset-0 overflow-hidden phone:[clip-path:none]!" style={{ clipPath: layout.end }}>
             <div data-img className="absolute inset-0">
               <Image src={l.image} alt={l.alt} fill sizes="100vw" quality={75} className="object-cover" />
             </div>
@@ -99,8 +99,8 @@ export function LookbookScroller({ looks, labels }: { looks: LookSlide[]; labels
           </div>
         );
         return (
-          <section key={l.id} data-spread className="relative h-[220vh]" aria-labelledby={`look-${l.id}`}>
-            <div className="sticky top-0 h-[100svh] overflow-hidden">
+          <section key={l.id} data-spread className="relative h-[220vh] phone:h-auto" aria-labelledby={`look-${l.id}`}>
+            <div className="sticky top-0 h-[100svh] overflow-hidden phone:static phone:h-[62svh]">
               <Link href={l.href} data-cursor={labels.open} className="absolute inset-0 block" aria-label={`${l.title} — ${labels.open}`}>
                 {l.morph ? (
                   <ViewTransition name={l.morph} share="morph" default="none">
@@ -112,7 +112,7 @@ export function LookbookScroller({ looks, labels }: { looks: LookSlide[]; labels
               </Link>
               <div
                 className={clsx(
-                  "pointer-events-none absolute inset-x-0 bottom-0 z-10 pb-24 md:pb-14",
+                  "pointer-events-none absolute inset-x-0 bottom-0 z-10 pb-24 md:pb-14 phone:pb-6",
                   layout.cap === "right" && "text-right",
                 )}
               >
@@ -120,7 +120,7 @@ export function LookbookScroller({ looks, labels }: { looks: LookSlide[]; labels
                   <p data-meta className="t-eyebrow mb-4 text-blush">
                     Look {String(i + 1).padStart(2, "0")} · {l.technique}
                   </p>
-                  <h2 id={`look-${l.id}`} className="font-serif text-[clamp(4.2rem,15vw,17rem)] italic leading-[0.8] tracking-[-0.04em] text-cream" aria-label={l.title}>
+                  <h2 id={`look-${l.id}`} className="font-serif text-[clamp(4.2rem,15vw,17rem)] italic leading-[0.8] tracking-[-0.04em] text-cream phone:text-[clamp(2.5rem,11vw,5rem)] phone:leading-[0.95]" aria-label={l.title}>
                     {l.title.split("").map((ch, k) => (
                       <span key={k} className="inline-block overflow-hidden pb-[0.08em] align-bottom" aria-hidden>
                         <span data-char className="inline-block">

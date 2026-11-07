@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import clsx from "clsx";
+import { isPhone } from "@/lib/motion";
 
 export type StylistCardData = {
   id: string;
@@ -28,18 +29,20 @@ const FAN = [
 ];
 
 /**
- * Stylist card. Hover (desktop) or tap (touch) fans the portrait out into four
- * photos of their work, and slides up specialties + "Book with …".
+ * Stylist card. Hover (desktop) fans the portrait out into four photos of their work;
+ * on phones a tap swaps the portrait for those photos inside the same frame, so nothing
+ * leaves the screen. Both slide up specialties + "Book with …".
  */
 export function StylistCard({ s, index, tapHint }: { s: StylistCardData; index: number; tapHint: string }) {
   const [open, setOpen] = useState(false);
 
   return (
     <article
-      className="group/card relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
+      data-open={open || undefined}
+      className="group/card relative phone:w-[60vw] phone:max-w-[20rem] phone:shrink-0 phone:snap-start"
+      onMouseEnter={() => !isPhone() && setOpen(true)}
+      onMouseLeave={() => !isPhone() && setOpen(false)}
+      onFocus={() => !isPhone() && setOpen(true)}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpen(false);
       }}
@@ -50,9 +53,10 @@ export function StylistCard({ s, index, tapHint }: { s: StylistCardData; index: 
           {s.works.map((w, i) => (
             <div
               key={w.src}
+              data-work
               className="absolute inset-[14%] overflow-hidden shadow-[0_24px_50px_-20px_rgba(15,11,12,0.55)] transition-transform duration-[900ms] ease-[var(--ease-out-expo)]"
               style={{
-                transform: open ? `translate(${FAN[i].x}%, ${FAN[i].y}%) rotate(${FAN[i].r}deg) scale(0.72)` : "translate(0,0) rotate(0) scale(0.6)",
+                ["--fan" as string]: open ? `translate(${FAN[i].x}%, ${FAN[i].y}%) rotate(${FAN[i].r}deg) scale(0.72)` : "translate(0,0) rotate(0) scale(0.6)",
                 transitionDelay: open ? `${i * 50}ms` : "0ms",
                 zIndex: i,
               }}
@@ -64,16 +68,17 @@ export function StylistCard({ s, index, tapHint }: { s: StylistCardData; index: 
 
         {/* Portrait */}
         <div
+          data-portrait
           className="absolute inset-0 z-10 overflow-hidden transition-[transform,clip-path] duration-[900ms] ease-[var(--ease-out-expo)]"
           style={{
-            transform: open ? "translateY(20%) scale(0.62)" : "none",
-            clipPath: open ? "inset(0 0 0 0 round 999px 999px 0 0)" : "inset(0 0 0 0 round 0)",
+            ["--portrait" as string]: open ? "translateY(20%) scale(0.62)" : "none",
+            ["--portrait-clip" as string]: open ? "inset(0 0 0 0 round 999px 999px 0 0)" : "inset(0 0 0 0 round 0)",
           }}
         >
-          <Image src={s.portrait} alt={s.portraitAlt} fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 45vw, 90vw" className="object-cover" />
+          <Image src={s.portrait} alt={s.portraitAlt} fill sizes="(min-width: 1024px) 20vw, (min-width: 640px) 45vw, 60vw" className="object-cover" />
         </div>
 
-        <span className="t-eyebrow absolute left-3 top-3 z-20 text-cream mix-blend-difference">{String(index + 1).padStart(2, "0")}</span>
+        <span className="t-eyebrow absolute left-3 top-3 z-20 text-cream mix-blend-difference phone:mix-blend-normal">{String(index + 1).padStart(2, "0")}</span>
 
         {/* Touch toggle */}
         <button
@@ -81,18 +86,21 @@ export function StylistCard({ s, index, tapHint }: { s: StylistCardData; index: 
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-label={`${tapHint}: ${s.name}`}
-          className="absolute bottom-3 right-3 z-20 grid h-11 w-11 place-items-center rounded-full bg-cream/90 text-ink backdrop-blur [@media(hover:hover)]:hidden"
+          className="absolute bottom-3 right-3 z-20 grid h-11 w-11 place-items-center rounded-full bg-cream/90 text-ink backdrop-blur [@media(hover:hover)]:hidden phone:grid!"
         >
           <span aria-hidden className={clsx("text-lg transition-transform duration-500", open && "rotate-45")}>+</span>
         </button>
       </div>
 
-      <div className="mt-5">
-        <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-serif text-[1.75rem] leading-none">{s.name}</h3>
-          <span className="text-[0.8rem] text-muted">{s.years}</span>
+      <div className="mt-5 phone:mt-3">
+        <div className="flex items-baseline justify-between gap-3 phone:block">
+          <h3 className="font-serif text-[1.75rem] leading-none phone:text-[1.3rem] phone:leading-tight">{s.name}</h3>
+          <span className="text-[0.8rem] text-muted phone:hidden">{s.years}</span>
         </div>
-        <p className="mt-2 text-[0.92rem] text-muted">{s.role}</p>
+        <p className="mt-2 text-[0.92rem] text-muted phone:mt-0.5 phone:text-[0.82rem] phone:leading-snug">
+          {s.role}
+          <span className="hidden phone:inline"> · {s.years}</span>
+        </p>
         <div
           className="grid transition-[grid-template-rows,opacity] duration-700 ease-[var(--ease-out-expo)]"
           style={{ gridTemplateRows: open ? "1fr" : "0fr", opacity: open ? 1 : 0.001 }}

@@ -7,7 +7,7 @@ import { useBiz } from "@/components/preview/BizContext";
 import type { Locale } from "@/lib/i18n";
 
 /** Live "Open now · closes at 21:00" badge in the business's time zone; the server render shows the neutral hours line. */
-export function OpenBadge({ locale, className }: { locale: Locale; className?: string }) {
+export function OpenBadge({ locale, className, short }: { locale: Locale; className?: string; /** Drop "Closed ·" / "Open now ·": the dot already says it. */ short?: boolean }) {
   const biz = useBiz();
   const [state, setState] = useState<{ open: boolean; text: string } | null>(null);
   useEffect(() => {
@@ -18,7 +18,9 @@ export function OpenBadge({ locale, className }: { locale: Locale; className?: s
   }, [biz, locale]);
 
   if (!biz.hours) return null;
-  const label = state?.text ?? (biz.preview ? biz.hoursSummary : locale === "sr" ? "Uto–sub 9–21 h" : "Tue–Sat 9 am–9 pm");
+  const full = state?.text ?? (biz.preview ? biz.hoursSummary : locale === "sr" ? "Uto–sub 9–21 h" : "Tue–Sat 9 am–9 pm");
+  const tail = short ? full.split(" · ").pop()! : full;
+  const label = tail.charAt(0).toUpperCase() + tail.slice(1);
   const open = state ? state.open : null;
   return (
     <span className={clsx("inline-flex items-center gap-2", className)}>

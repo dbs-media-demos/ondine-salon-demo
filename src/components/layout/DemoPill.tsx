@@ -5,7 +5,7 @@ import { agency, agencyUrl } from "@/lib/site";
 
 const KEY = "ondine-demo-pill";
 
-/** Small "Concept site by Scale by Noon" badge, dismissible for this session. */
+/** Small "Concept site by Scale by Noon" badge, dismissible for this session. On phones it sits in the footer's flow, so it can never cover anything. */
 export function DemoPill({ label, dismissLabel }: { label: string; dismissLabel: string }) {
   const [hidden, setHidden] = useState(false);
   const dismissed = useSyncExternalStore(
@@ -23,7 +23,10 @@ export function DemoPill({ label, dismissLabel }: { label: string; dismissLabel:
   if (hidden || dismissed) return null;
 
   return (
-    <div className="fixed bottom-[5.25rem] right-3 z-[120] flex items-center overflow-hidden rounded-full border border-ink/10 bg-cream/90 text-[0.75rem] text-ink shadow-[0_8px_30px_-12px_rgba(15,11,12,0.35)] backdrop-blur md:bottom-5 md:right-5">
+    <div
+      data-demo-pill
+      className="fixed bottom-[5.25rem] right-3 z-[120] flex items-center overflow-hidden rounded-full border border-ink/10 bg-cream/90 text-[0.75rem] text-ink shadow-[0_8px_30px_-12px_rgba(15,11,12,0.35)] backdrop-blur md:bottom-5 md:right-5 phone:static phone:mx-auto phone:mb-6 phone:w-fit phone:max-w-[calc(100%-2*var(--gutter))] phone:bg-cream phone:shadow-none phone:backdrop-blur-none"
+    >
       <a
         href={agencyUrl}
         target="_blank"
@@ -32,8 +35,8 @@ export function DemoPill({ label, dismissLabel }: { label: string; dismissLabel:
         className="flex min-h-11 items-center gap-2 py-2 pl-4 pr-2 font-medium hover:text-wine"
       >
         <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-wine" />
-        <span className="hidden whitespace-nowrap sm:inline">{label}</span>
-        <span className="whitespace-nowrap sm:hidden">{agency.name}</span>
+        <span className="hidden whitespace-nowrap sm:inline phone:inline phone:whitespace-normal">{label}</span>
+        <span className="whitespace-nowrap sm:hidden phone:hidden">{agency.name}</span>
         <span aria-hidden>↗</span>
       </a>
       <button

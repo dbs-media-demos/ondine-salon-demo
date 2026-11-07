@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Phones and touch devices. Same condition as PHONE_QUERY in lib/motion.ts. */
+@custom-variant phone {
+  @media (max-width: 767px), (hover: none), (pointer: coarse) {
+    @slot;
+  }
+}
+
 /* ────────────────────────────────────────────────────────────────
    Ondine — design tokens
    Editorial fashion magazine: warm ink, cream paper, blush/nude
@@ -423,7 +430,216 @@ html.lenis body {
   }
 }
 
+/* ──────────────────────────── phones ──────────────────────────
+   Below 768 px or on touch: simple, fast, nothing pinned. Desktop never reads this block.
+   Motion here: tap feedback, one fade-and-rise per section, swipe rails, the length
+   switch and the scissors above the price list. */
+
+@media (max-width: 767px), (hover: none), (pointer: coarse) {
+  :root {
+    --header-h: 4rem;
+    /* Height of the fixed Call + Book bar */
+    --bar-h: calc(3rem + 1.25rem + 1px + env(safe-area-inset-bottom));
+  }
+
+  /* Two font files only: Playfair for display, the system's own sans for everything else. */
+  html:root {
+    --font-hanken: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* A fieldset's default min-width lets a swipe rail inside it widen the page */
+  fieldset {
+    min-inline-size: 0;
+  }
+
+  /* Oversized type comes down */
+  .t-display {
+    font-size: clamp(2.5rem, 11vw, 4.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+  }
+  .t-h1 {
+    font-size: clamp(2.05rem, 9vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.022em;
+  }
+  .t-h2 {
+    font-size: clamp(1.8rem, 7.8vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+  }
+  .t-h3 {
+    font-size: 1.4rem;
+  }
+  .t-lead {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Paint first, no intros */
+  .anim-heading,
+  .anim-fade,
+  .anim-img,
+  .masthead-letters,
+  .logo-wave,
+  .live-dot,
+  .marquee-track {
+    animation: none;
+  }
+  .logo-wave {
+    stroke-dasharray: none;
+  }
+  .grain {
+    display: none;
+  }
+  ::view-transition-old(.page),
+  ::view-transition-new(.page) {
+    animation: none;
+  }
+
+  /* Tap feedback */
+  a,
+  button,
+  label {
+    touch-action: manipulation;
+    transition-property: transform, color, background-color, border-color, opacity;
+  }
+  a:active,
+  button:active,
+  label:active {
+    transform: scale(0.975);
+    transition-duration: 0.12s;
+  }
+
+  /* Swipe rails: sideways stays in the rail, everything else scrolls the page */
+  [class*="snap-x"] {
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  [class*="snap-x"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Stylist cards: a tap swaps the portrait for four photos of their work, inside the frame */
+  [data-work] {
+    display: none;
+    inset: auto;
+    width: 50%;
+    height: 50%;
+    box-shadow: none;
+    transition: none;
+  }
+  [data-work]:nth-child(1),
+  [data-work]:nth-child(3) {
+    left: 0;
+  }
+  [data-work]:nth-child(2),
+  [data-work]:nth-child(4) {
+    right: 0;
+  }
+  [data-work]:nth-child(1),
+  [data-work]:nth-child(2) {
+    top: 0;
+  }
+  [data-work]:nth-child(3),
+  [data-work]:nth-child(4) {
+    bottom: 0;
+  }
+  [data-open] [data-work] {
+    display: block;
+    animation: rise 0.45s var(--ease-out-expo) both;
+  }
+  [data-portrait] {
+    transition: opacity 0.4s;
+  }
+  [data-open] [data-portrait] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* One small fade-and-rise per section */
+  .rise-wait {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .rise-in {
+    animation: rise 0.7s var(--ease-out-expo) both;
+  }
+
+  /* The scissors above the price list */
+  .snip-go .snip-scissors {
+    animation: snip-run 1.7s cubic-bezier(0.45, 0, 0.3, 1) 0.25s both;
+  }
+  .snip-go .snip-blade-a,
+  .snip-go .snip-blade-b {
+    animation: snip-a 0.28s ease-in-out 0.25s 6 alternate both;
+  }
+  .snip-go .snip-blade-b {
+    animation-name: snip-b;
+  }
+}
+
+/* Desktop's fan and portrait positions, set per card */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  [data-work] {
+    transform: var(--fan);
+  }
+  [data-portrait] {
+    transform: var(--portrait);
+    clip-path: var(--portrait-clip);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.snip-blade-a,
+.snip-blade-b {
+  transform-box: view-box;
+  transform-origin: 16px 10px;
+}
+@keyframes snip-run {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(100cqw - 2rem));
+  }
+}
+@keyframes snip-a {
+  to {
+    transform: rotate(11deg);
+  }
+}
+@keyframes snip-b {
+  to {
+    transform: rotate(-11deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  a:active,
+  button:active,
+  label:active {
+    transform: none;
+  }
   *,
   *::before,
   *::after {

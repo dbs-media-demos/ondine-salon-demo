@@ -54,7 +54,7 @@ export function CityMap({ className, label }: { className?: string; label: strin
         <text x="40" y="400" fill="#c6a08a" fontSize="13" letterSpacing="4" fontFamily="sans-serif" transform="rotate(-70 40 400)">SAVA</text>
         {/* Pin */}
         <g transform="translate(470 381)">
-          <circle r="34" fill="#b89468" fillOpacity=".15">
+          <circle r="34" fill="#b89468" fillOpacity=".15" className="phone:hidden">
             <animate attributeName="r" values="14;40;14" dur="3s" repeatCount="indefinite" />
             <animate attributeName="fill-opacity" values=".35;0;.35" dur="3s" repeatCount="indefinite" />
           </circle>

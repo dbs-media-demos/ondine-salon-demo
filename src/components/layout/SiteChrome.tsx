@@ -60,12 +60,17 @@ export function SiteChrome({ locale, biz, children }: { locale: Locale; biz?: Bi
         brandName={biz?.shortName}
       />
       {children}
-      <Footer locale={locale} biz={biz} />
-      <MobileBar callLabel={d.call} bookLabel={d.book} phoneHref={phoneHref} bookHref={pageHref(locale, "booking")} />
-      <DemoPill
-        label={biz ? (locale === "sr" ? `Pregled za ${biz.shortName} · Scale by Noon` : `Preview for ${biz.shortName} · by Scale by Noon`) : d.demoPill}
-        dismissLabel={d.demoDismiss}
+      <Footer
+        locale={locale}
+        biz={biz}
+        pill={
+          <DemoPill
+            label={biz ? (locale === "sr" ? `Pregled za ${biz.shortName} · Scale by Noon` : `Preview for ${biz.shortName} · by Scale by Noon`) : d.demoPill}
+            dismissLabel={d.demoDismiss}
+          />
+        }
       />
+      <MobileBar callLabel={d.call} phone={phone} bookLabel={d.bookShort} phoneHref={phoneHref} bookHref={pageHref(locale, "booking")} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "@/lib/gsap";
+import { loadGsap } from "@/lib/motion";
 
 /**
  * Desktop cursor: a small ink dot that grows into a wine disc with a label
@@ -23,12 +23,20 @@ export function Cursor() {
   useEffect(() => {
     const el = ref.current;
     if (!enabled || !el) return;
-    const xTo = gsap.quickTo(el, "x", { duration: 0.5, ease: "power3.out" });
-    const yTo = gsap.quickTo(el, "y", { duration: 0.5, ease: "power3.out" });
+    let gsap: Awaited<ReturnType<typeof loadGsap>>["gsap"] | undefined;
+    let xTo: ((v: number) => void) | undefined;
+    let yTo: ((v: number) => void) | undefined;
+    let live = true;
+    loadGsap().then((m) => {
+      if (!live) return;
+      gsap = m.gsap;
+      xTo = gsap.quickTo(el, "x", { duration: 0.5, ease: "power3.out" });
+      yTo = gsap.quickTo(el, "y", { duration: 0.5, ease: "power3.out" });
+    });
     let current = "";
     const move = (e: PointerEvent) => {
-      xTo(e.clientX);
-      yTo(e.clientY);
+      xTo?.(e.clientX);
+      yTo?.(e.clientY);
       const target = (e.target as Element | null)?.closest?.("[data-cursor]");
       const next = target?.getAttribute("data-cursor") ?? "";
       if (next !== current) {
@@ -36,12 +44,13 @@ export function Cursor() {
         setLabel(next);
       }
     };
-    const leave = () => gsap.to(el, { opacity: 0, duration: 0.3 });
-    const enter = () => gsap.to(el, { opacity: 1, duration: 0.3 });
+    const leave = () => gsap?.to(el, { opacity: 0, duration: 0.3 });
+    const enter = () => gsap?.to(el, { opacity: 1, duration: 0.3 });
     window.addEventListener("pointermove", move, { passive: true });
     document.documentElement.addEventListener("pointerleave", leave);
     document.documentElement.addEventListener("pointerenter", enter);
     return () => {
+      live = false;
       window.removeEventListener("pointermove", move);
       document.documentElement.removeEventListener("pointerleave", leave);
       document.documentElement.removeEventListener("pointerenter", enter);

@@ -158,7 +158,7 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
       </section>
 
       {/* Intro + included */}
-      <section className="theme-cream border-t border-line py-24 md:py-36">
+      <section className="theme-cream border-t border-line py-24 md:py-36 phone:py-12">
         <div className="wrap grid gap-16 lg:grid-cols-[1.3fr_0.7fr]">
           <div>
             <ScrubWords text={s.intro[locale][0]} className="font-serif text-[clamp(1.7rem,3vw,3rem)] leading-[1.15] tracking-[-0.015em]" />
@@ -192,7 +192,7 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
       )}
 
       {/* Process */}
-      <section className="theme-cream py-24 md:py-36">
+      <section className="theme-cream py-24 md:py-36 phone:py-12">
         <div className="wrap">
           <SplitReveal className="t-h2 mb-14 max-w-[14ch]">{c.process}</SplitReveal>
           <ProcessStack steps={s.steps[locale]} />
@@ -200,7 +200,7 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
       </section>
 
       {/* Prices */}
-      <section className="theme-cream border-t border-line py-24 md:py-36" aria-labelledby="svc-prices">
+      <section className="theme-cream border-t border-line py-24 md:py-36 phone:py-12" aria-labelledby="svc-prices">
         <div className="wrap grid gap-12 lg:grid-cols-[0.6fr_1.4fr]">
           <div>
             <h2 id="svc-prices" className="t-h2">
@@ -241,7 +241,7 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
       </section>
 
       {/* Gallery */}
-      <section className="theme-cream py-24 md:py-36" aria-labelledby="svc-gallery">
+      <section className="theme-cream py-24 md:py-36 phone:py-12" aria-labelledby="svc-gallery">
         <div className="wrap">
           <SplitReveal id="svc-gallery" className="t-h2 mb-14">
             {c.gallery}
@@ -251,12 +251,12 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
       </section>
 
       {/* Stylists */}
-      <section className="theme-blush py-24 md:py-36" aria-labelledby="svc-team">
+      <section className="theme-blush py-24 md:py-36 phone:py-12" aria-labelledby="svc-team">
         <div className="wrap">
           <SplitReveal id="svc-team" className="t-h2 mb-14">
             {c.team}
           </SplitReveal>
-          <div className="grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="no-scrollbar grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4 phone:-mx-[var(--gutter)] phone:flex phone:snap-x phone:snap-mandatory phone:scroll-pl-[var(--gutter)] phone:items-start phone:gap-x-3 phone:overflow-x-auto phone:px-[var(--gutter)]">
             {s.stylists.map((id, i) => {
               const st = stylistById(id)!;
               return <StylistCard key={id} s={stylistCard(locale, st)} index={i} tapHint={c.hint} />;
@@ -266,7 +266,7 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
       </section>
 
       {/* FAQ */}
-      <section className="theme-cream py-24 md:py-36" aria-labelledby="svc-faq">
+      <section className="theme-cream py-24 md:py-36 phone:py-12" aria-labelledby="svc-faq">
         <div className="wrap grid gap-12 lg:grid-cols-[0.6fr_1.4fr]">
           <SplitReveal id="svc-faq" className="t-h2">
             {c.faq}
@@ -280,7 +280,7 @@ export function ServiceDetailView({ locale, service: s }: { locale: Locale; serv
         <div className="absolute inset-0 opacity-40 transition-[opacity,transform] duration-[1.4s] ease-[var(--ease-out-expo)] group-hover:scale-105 group-hover:opacity-60">
           <Photo k={next.image} alt="" sizes="100vw" />
         </div>
-        <div className="wrap relative flex min-h-[60vh] flex-col justify-end py-16">
+        <div className="wrap relative flex min-h-[60vh] flex-col justify-end py-16 phone:min-h-[44svh] phone:py-10">
           <p className="t-eyebrow text-champagne">{c.next} →</p>
           <p className="t-display mt-6 transition-[font-style] group-hover:italic">{next.title[locale]}</p>
         </div>

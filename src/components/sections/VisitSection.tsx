@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { CityMap } from "./CityMap";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { Button } from "@/components/ui/Button";
@@ -10,14 +11,14 @@ import { site } from "@/lib/site";
 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Strahinjića Bana, Beograd")}`;
 
 /** Where + when: stylised Dorćol map, address, hours with a live open badge, directions. */
-export function VisitSection({ locale }: { locale: Locale }) {
+export function VisitSection({ locale, className }: { locale: Locale; className?: string }) {
   const d = getDictionary(locale);
   const sr = locale === "sr";
   return (
-    <section className="theme-ink py-24 md:py-36" aria-labelledby="visit-title">
-      <div className="wrap grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+    <section className={clsx("theme-ink py-24 md:py-36 phone:py-12", className)} aria-labelledby="visit-title">
+      <div className="wrap grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center phone:block">
         <div>
-          <p className="t-eyebrow mb-6 text-champagne">{d.footer.visit}</p>
+          <p className="t-eyebrow mb-6 text-champagne phone:mb-2">{d.footer.visit}</p>
           <SplitReveal id="visit-title" className="t-h1">
             {sr ? (
               <>
@@ -29,9 +30,9 @@ export function VisitSection({ locale }: { locale: Locale }) {
               </>
             )}
           </SplitReveal>
-          <Reveal stagger={0.08} className="mt-10 grid gap-8 sm:grid-cols-2">
+          <Reveal stagger={0.08} className="mt-10 grid gap-8 sm:grid-cols-2 phone:mt-5 phone:grid-cols-1 phone:gap-5">
             <div>
-              <p className="t-eyebrow mb-3 text-muted">{sr ? "Adresa" : "Address"}</p>
+              <p className="t-eyebrow mb-3 text-muted phone:mb-1.5">{sr ? "Adresa" : "Address"}</p>
               <address className="not-italic text-[1.05rem] leading-relaxed">
                 {site.address.street}
                 <br />
@@ -42,17 +43,17 @@ export function VisitSection({ locale }: { locale: Locale }) {
               </p>
             </div>
             <div>
-              <p className="t-eyebrow mb-3 text-muted">{d.hours.title}</p>
+              <p className="t-eyebrow mb-3 text-muted phone:mb-1.5">{d.hours.title}</p>
               <p className="text-[1.05rem]">
                 {d.hours.weekdays} · 9–21
               </p>
               <p className="text-muted">
                 {d.hours.sunMon}: {d.hours.closed}
               </p>
-              <OpenBadge locale={locale} className="mt-3 text-[0.9rem]" />
+              <OpenBadge locale={locale} className="mt-3 text-[0.9rem] phone:mt-2 phone:whitespace-nowrap" />
             </div>
           </Reveal>
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap gap-3 phone:mt-6">
             <Button href={pageHref(locale, "booking")} variant="light">
               {d.book}
             </Button>
@@ -61,7 +62,7 @@ export function VisitSection({ locale }: { locale: Locale }) {
             </Button>
           </div>
         </div>
-        <Reveal>
+        <Reveal className="phone:mt-7">
           <CityMap className="aspect-[4/3] w-full" label={sr ? "Stilizovana mapa Dorćola sa lokacijom salona u Strahinjića Bana" : "Stylised map of Dorćol showing the salon on Strahinjića Bana"} />
         </Reveal>
       </div>

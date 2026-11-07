@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import clsx from "clsx";
-import { gsap, useGSAP, isTouch, prefersReducedMotion } from "@/lib/gsap";
+import { prefersReducedMotion, useDesktopMotion } from "@/lib/motion";
 
 export type ServiceRow = { id: string; num: string; title: string; tagline: string; href: string; image: string; alt: string; from: string };
 
@@ -17,11 +17,11 @@ export function ServiceIndex({ rows, cursorLabel }: { rows: ServiceRow[]; cursor
   const float = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>(null);
 
-  useGSAP(
-    () => {
+  useDesktopMotion(
+    ({ gsap }) => {
       const el = root.current;
       const f = float.current;
-      if (!el || !f || isTouch()) return;
+      if (!el || !f) return;
       const reduced = prefersReducedMotion();
       const xTo = gsap.quickTo(f, "x", { duration: reduced ? 0 : 0.9, ease: "power3.out" });
       const yTo = gsap.quickTo(f, "y", { duration: reduced ? 0 : 0.9, ease: "power3.out" });
@@ -37,7 +37,7 @@ export function ServiceIndex({ rows, cursorLabel }: { rows: ServiceRow[]; cursor
       el.addEventListener("pointermove", move);
       return () => el.removeEventListener("pointermove", move);
     },
-    { scope: root },
+    root,
   );
 
   return (
@@ -51,21 +51,22 @@ export function ServiceIndex({ rows, cursorLabel }: { rows: ServiceRow[]; cursor
               onPointerEnter={() => setActive(i)}
               onFocus={() => setActive(i)}
               onBlur={() => setActive(null)}
-              className="group grid grid-cols-[2.2rem_1fr_auto] items-center gap-x-4 py-6 md:grid-cols-[4rem_1.1fr_1fr_auto] md:gap-x-8 md:py-9"
+              className="group grid grid-cols-[2.2rem_1fr_auto] items-center gap-x-4 py-6 md:grid-cols-[4rem_1.1fr_1fr_auto] md:gap-x-8 md:py-9 phone:grid-cols-[1.6rem_1fr_auto] phone:gap-x-3 phone:py-2.5"
             >
-              <span className="t-eyebrow self-start pt-3 text-muted md:pt-5">{r.num}</span>
-              <span className="font-serif text-[clamp(2.1rem,6vw,6.2rem)] leading-[0.95] tracking-[-0.03em] transition-[transform,color] duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 group-hover:italic group-hover:text-wine">
+              <span className="t-eyebrow self-start pt-3 text-muted md:pt-5 phone:pt-2">{r.num}</span>
+              <span className="font-serif text-[clamp(2.1rem,6vw,6.2rem)] leading-[0.95] tracking-[-0.03em] transition-[transform,color] duration-700 ease-[var(--ease-out-expo)] group-hover:translate-x-3 group-hover:italic group-hover:text-wine phone:text-[1.5rem] phone:leading-[1.1] phone:tracking-[-0.02em]">
                 {r.title}
+                <span className="mt-1 hidden font-sans text-[0.8rem] font-normal tracking-normal text-muted phone:block">{r.from}</span>
               </span>
-              <span className="hidden max-w-sm text-[0.98rem] leading-relaxed text-muted md:block">{r.tagline}</span>
+              <span className="hidden max-w-sm text-[0.98rem] leading-relaxed text-muted md:block phone:hidden">{r.tagline}</span>
               <span className="flex items-center gap-4">
-                <span className="relative h-16 w-12 shrink-0 overflow-hidden md:hidden">
+                <span className="relative h-16 w-12 shrink-0 overflow-hidden md:hidden phone:block phone:h-14 phone:w-11">
                   <Image src={r.image} alt="" fill sizes="96px" className="object-cover" />
                 </span>
-                <span className="hidden whitespace-nowrap text-[0.9rem] md:block">{r.from}</span>
+                <span className="hidden whitespace-nowrap text-[0.9rem] md:block phone:hidden">{r.from}</span>
                 <span
                   aria-hidden
-                  className="hidden h-12 w-12 place-items-center rounded-full border border-line transition-all duration-500 group-hover:rotate-[-45deg] group-hover:border-wine group-hover:bg-wine group-hover:text-cream md:grid"
+                  className="hidden h-12 w-12 place-items-center rounded-full border border-line transition-all duration-500 group-hover:rotate-[-45deg] group-hover:border-wine group-hover:bg-wine group-hover:text-cream md:grid phone:hidden"
                 >
                   →
                 </span>

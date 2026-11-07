@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, ScrollTrigger, useGSAP, prefersReducedMotion } from "@/lib/gsap";
+import { prefersReducedMotion, useDesktopMotion } from "@/lib/motion";
 
 /** Number that counts up when scrolled into view. The final value is in the HTML. */
 export function CountUp({ value, decimals = 0, className, locale = "sr" }: { value: number; decimals?: number; className?: string; locale?: string }) {
@@ -9,7 +9,7 @@ export function CountUp({ value, decimals = 0, className, locale = "sr" }: { val
   const fmt = (n: number) =>
     new Intl.NumberFormat(locale === "sr" ? "sr-Latn-RS" : "en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(n);
 
-  useGSAP(() => {
+  useDesktopMotion(({ gsap, ScrollTrigger }) => {
     const el = ref.current;
     if (!el || prefersReducedMotion()) return;
     const obj = { n: 0 };

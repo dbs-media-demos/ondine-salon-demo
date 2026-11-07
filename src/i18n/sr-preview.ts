@@ -1,6 +1,6 @@
 /**
  * Serbian previews: reviews lose the concept salon's stylists (their names) so they read as the
- * business's own sample reviews. Keys are the concept site's text fragments (applied by preview/Translate).
+ * business's own sample reviews. Keys are the concept site's text fragments (applied by ReviewCard, in the server render).
  */
 export const srPreview: Record<string, string> = {
   "Posle tri salona i narandžastih pramenova, Mila mi je za dva termina vratila hladnu plavu. Prvi put mi je izrast posle dva meseca izgledao kao da je namerno.":
