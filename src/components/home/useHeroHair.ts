@@ -2,36 +2,16 @@
 
 import { useEffect, useState, type RefObject } from "react";
 import type { HeroHair, HeroState } from "@/components/fx/hair/heroScene";
-
-/** Live 3D only on a big screen with a mouse. Everything else keeps the still. */
-export const DESK_3D = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
-
-/** The same check every live 3D scene on the site makes before it fetches any of its code. */
-export function canRun3D() {
-  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  return window.matchMedia(DESK_3D).matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && !conn?.saveData;
-}
-
-/** Runs `cb` once the page has loaded and the browser is idle, never before `minMs` after navigation start. */
-export function afterLoad(cb: () => void, minMs = 1200) {
-  let t = 0;
-  const idle = () => {
-    const ric = window.requestIdleCallback ?? ((f: () => void) => window.setTimeout(f, 120));
-    t = window.setTimeout(() => ric(cb, { timeout: 1200 }), Math.max(0, minMs - performance.now()));
-  };
-  if (document.readyState === "complete") idle();
-  else window.addEventListener("load", idle, { once: true });
-  return () => {
-    window.clearTimeout(t);
-    window.removeEventListener("load", idle);
-  };
-}
+import { canRun3D, fallBack, frameWatch, hasGpu, inTurn, onFallBack, stillsOnly, whenIdle } from "@/components/fx/live3d";
 
 /**
  * The hero's live hair. The server HTML carries a still rendered from this scene (scripts/render-hair-stills.mjs),
- * so phones and every other device show it at once. On a desktop with a mouse, after load, the scene's code is
- * fetched with `await import()` (three.js never reaches a phone), both canvases fade in over the still and the
- * lock pours in over the masthead. Frames are drawn only while the hero is on screen and the tab is visible.
+ * so phones and every other device show it at once. On a desktop with a mouse and a real graphics chip, once
+ * the page has loaded and gone idle, the scene's code is fetched with `await import()` (three.js never
+ * reaches a phone), built, compiled and drawn once unseen; only then do both canvases fade in over the still
+ * and the lock pours in over the masthead. If its first 2 s on screen run under ~45 fps, the canvases fade
+ * back to the still and the renderer is freed (live3d.ts). Frames are drawn only while the hero is on screen
+ * and the tab is visible.
  */
 export function useHeroHair(o: {
   root: RefObject<HTMLElement | null>;
@@ -49,22 +29,52 @@ export function useHeroHair(o: {
     const front = o.front.current;
     if (!root || !back || !front || !canRun3D()) return;
 
-    let cancelled = false;
+    const abort = new AbortController();
+    const cancelled = () => abort.signal.aborted;
     let h: HeroHair | undefined;
     const off: (() => void)[] = [];
+    let release = () => {};
+    let gone = 0;
 
-    const start = async () => {
+    // The canvases fade back to the still (CSS, 1 s), then the renderer is freed
+    const giveUp = () => {
+      if (!h || cancelled()) return;
+      const scene = h;
+      scene.stop();
+      off.forEach((f) => f());
+      off.length = 0;
+      setOn(false);
+      release();
+      gone = window.setTimeout(() => {
+        scene.dispose();
+        if (h === scene) h = undefined;
+      }, 1100);
+    };
+
+    // The next scene down the page warms up only once this one has passed its first 2 s on screen (or 5 s on)
+    void inTurn(async () => {
+      if (!(await whenIdle(abort.signal, 1200)) || stillsOnly() || !hasGpu()) return;
+      performance.mark("3d:hero:start");
       try {
         const { createHeroHair } = await import("@/components/fx/hair/heroScene");
-        if (cancelled) return;
-        h = await createHeroHair({ back, front, origin: o.origin, named: o.named, state: () => o.state.current });
-        if (cancelled) return h.dispose();
+        if (cancelled()) return;
+        const watch = frameWatch((ok) => {
+          performance.mark(`3d:hero:${ok ? "smooth" : "slow"}`);
+          if (!ok) fallBack("hero");
+          release();
+        });
+        h = await createHeroHair({ back, front, origin: o.origin, named: o.named, state: () => o.state.current, watch });
+        if (cancelled()) return h.dispose();
       } catch {
-        return; // no WebGL: the still stays
+        return; // no WebGL, or no real graphics chip: the still stays
       }
       const scene = h;
+      const turn = new Promise<void>((resolve) => (release = resolve));
+      const t = window.setTimeout(release, 5000);
+      off.push(() => window.clearTimeout(t), onFallBack(giveUp));
       scene.onReady(() => {
-        if (cancelled) return;
+        if (cancelled() || !h) return;
+        performance.mark("3d:hero:live");
         setOn(true);
         scene.intro();
       });
@@ -95,11 +105,13 @@ export function useHeroHair(o: {
         document.documentElement.removeEventListener("pointerleave", onLeave);
         document.removeEventListener("visibilitychange", sync);
       });
-    };
+      await turn;
+    });
 
-    off.push(afterLoad(() => void start()));
     return () => {
-      cancelled = true;
+      abort.abort();
+      release();
+      window.clearTimeout(gone);
       off.forEach((f) => f());
       h?.dispose();
     };

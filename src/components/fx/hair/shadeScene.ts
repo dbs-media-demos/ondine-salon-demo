@@ -2,13 +2,15 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { Guides, GUIDE, hairMaterial, lockMesh, type LockShape } from "./strands";
 import { softShadow } from "./shadow";
+import { nextFrame, type FrameWatch } from "../live3d";
 
 /**
  * The shade card: a colourist's swatch tresses hanging from a brass rod, one per shade, lit from the
  * upper left with soft shadows on the wall behind. The cursor brushes through them (each swings with
  * the pointer's speed, the tips more than the roots), scrolling stirs them, and the chosen shade swings
  * forward into the light while the others step back. Drawn on a transparent canvas over the section's
- * own colour; frames are drawn only while something moves and the card is on screen.
+ * own colour; frames are drawn only while something moves and the card is on screen. It starts hidden
+ * (`setVisible(true)` once it's on screen), with one frame already drawn unseen.
  */
 
 export type Shade = { root: string; tip: string };
@@ -45,7 +47,8 @@ export type ShadeCard = {
   stir(v: number): void;
   setVisible(v: boolean): void;
   resize(): void;
-  onReady(cb: () => void): void;
+  /** Stop for good: no more frames (the canvas keeps the last one while it fades out). */
+  stop(): void;
   renderStill(selected: number, w: number, h: number): void;
   dispose(): void;
 };
@@ -59,19 +62,47 @@ const DEFAULT_SHADES: Shade[] = [
   { root: "#7c6044", tip: "#d9c09a" },
 ];
 
-export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shade[]; still?: boolean; dpr?: number } = {}): Promise<ShadeCard> {
+/**
+ * The room's reflections for the brass, without the stall: PMREM compiles its shaders the moment it first
+ * draws with them, 300-450 ms of blocked main thread. So a dry run first swaps every draw for compileAsync
+ * (into the same targets, so the same shader variants), and once those are compiled the real run takes a
+ * few ms. The dry generator lives until then, so its programs aren't freed before they're reused.
+ */
+async function roomEnvironment(r: THREE.WebGLRenderer) {
+  const room = new RoomEnvironment();
+  const render = r.render;
+  const compiling: Promise<unknown>[] = [];
+  const dry = new THREE.PMREMGenerator(r);
+  r.render = (s, c) => void compiling.push(r.compileAsync(s, c));
+  try {
+    dry.fromScene(room, 0.04).dispose();
+  } finally {
+    r.render = render;
+  }
+  await Promise.all(compiling);
+  const pmrem = new THREE.PMREMGenerator(r);
+  const env = pmrem.fromScene(room, 0.04).texture;
+  pmrem.dispose();
+  dry.dispose();
+  room.dispose();
+  return env;
+}
+
+export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shade[]; still?: boolean; dpr?: number; watch?: FrameWatch } = {}): Promise<ShadeCard> {
   const shades = (o.shades ?? DEFAULT_SHADES).slice(0, N_MAX);
   const n = shades.length;
   const dpr = o.dpr ?? Math.min(window.devicePixelRatio || 1, 1.5);
-  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: "high-performance", preserveDrawingBuffer: !!o.still });
-  r.setPixelRatio(dpr);
+  // Live: a real graphics chip or nothing (the still stays); stills are rendered headless, where that may be software
+  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: "high-performance", failIfMajorPerformanceCaveat: !o.still, preserveDrawingBuffer: !!o.still });
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.toneMapping = THREE.NeutralToneMapping;
   r.setClearColor(0x000000, 0);
+  // Built in steps, a painted frame between them, so the page never waits long on the GPU process
+  await nextFrame();
 
   const scene = new THREE.Scene();
-  const pmrem = new THREE.PMREMGenerator(r);
-  const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const env = await roomEnvironment(r);
+  await nextFrame();
   scene.environment = env;
   scene.environmentIntensity = 0.7;
   const cam = new THREE.PerspectiveCamera(26, 1, 10, 6000);
@@ -149,13 +180,12 @@ export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shad
   let selected = -1;
   let pointer = { x: 0, y: 0, inside: false, vx: 0, px: 0 };
   let stirV = 0;
-  let visible = true;
+  let visible = false;
+  let stopped = false;
   let raf = 0;
   let time = 0;
   let last = performance.now();
   let calm = 0;
-  let readyFired = false;
-  const readyCbs: (() => void)[] = [];
   const v = new THREE.Vector3();
   const proj = new THREE.Vector3();
 
@@ -187,17 +217,23 @@ export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shad
     }
   };
 
+  // Only when the size really changes (a new size reallocates the canvas's buffers); true if it did
+  let sized = "";
+  let ratio = dpr;
   const resize = () => {
     const w = Math.max(1, canvas.clientWidth || canvas.width);
     const h = Math.max(1, canvas.clientHeight || canvas.height);
-    r.setSize(w, h, false);
+    if (sized === `${w}x${h}@${ratio}`) return false;
+    sized = `${w}x${h}@${ratio}`;
+    r.setDrawingBufferSize(w, h, ratio);
     cam.aspect = w / h;
     // Keep the whole card in frame on any shape
     const fitH = 540 / (2 * Math.tan(THREE.MathUtils.degToRad(13)));
     const fitW = (width + 160) / (2 * Math.tan(THREE.MathUtils.degToRad(13)) * cam.aspect);
     cam.position.z = Math.max(fitH, fitW) + 40;
     cam.updateProjectionMatrix();
-    mat.uniforms.uRes.value.set(w * r.getPixelRatio(), h * r.getPixelRatio());
+    mat.uniforms.uRes.value.set(w * ratio, h * ratio);
+    return true;
   };
 
   const step = (dt: number) => {
@@ -240,33 +276,35 @@ export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shad
 
   const loop = (now: number) => {
     raf = 0;
-    if (!visible) return;
+    if (!visible || stopped) return;
+    o.watch?.tick(now);
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     time += dt;
     step(dt);
     draw();
-    if (!readyFired) {
-      readyFired = true;
-      readyCbs.forEach((cb) => cb());
-    }
     // On demand: sleep once everything has settled (the slow strand wave pauses with it)
     calm = energy() < 0.002 ? calm + dt : 0;
     if (calm < 0.6) raf = requestAnimationFrame(loop);
   };
   const wake = () => {
     calm = 0;
-    if (!raf && visible && !o.still) {
+    if (!raf && visible && !o.still && !stopped) {
+      o.watch?.gap();
       last = performance.now();
       raf = requestAnimationFrame(loop);
     }
   };
 
+  await nextFrame();
   resize();
   pose();
-  await r.compileAsync(scene, cam).catch(() => {});
-  await r.compileAsync(castScene, shadow.cam).catch(() => {});
-  if (!o.still) wake();
+  // Every program compiled (off the main thread where the browser can), then one frame drawn unseen
+  await Promise.all([r.compileAsync(scene, cam), shadow.compileAsync()]).catch(() => {});
+  if (!o.still) {
+    await nextFrame();
+    draw();
+  }
 
   return {
     select(i) {
@@ -311,15 +349,15 @@ export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shad
       }
     },
     resize() {
-      resize();
-      if (!raf) draw();
+      if (resize() && !raf && !stopped) draw();
     },
-    onReady(cb) {
-      if (readyFired) cb();
-      else readyCbs.push(cb);
+    stop() {
+      stopped = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
     },
     renderStill(sel, w, h) {
-      r.setPixelRatio(1);
+      ratio = 1;
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       resize();
@@ -339,7 +377,6 @@ export async function createShades(canvas: HTMLCanvasElement, o: { shades?: Shad
         });
       shadow.dispose();
       env.dispose();
-      pmrem.dispose();
       guides.tex.dispose();
       r.dispose();
       r.forceContextLoss();

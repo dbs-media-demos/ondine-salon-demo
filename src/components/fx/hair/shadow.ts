@@ -81,9 +81,24 @@ export function softShadow(renderer: THREE.WebGLRenderer, cast: THREE.Scene, o: 
     renderer.setRenderTarget(prev);
   };
 
+  /**
+   * Compile the cast and blur programs for the render targets they draw into: three keys a program by
+   * its target's colour space and tone mapping, so compiling them for the canvas would miss.
+   */
+  const compileAsync = () => {
+    const prev = renderer.getRenderTarget();
+    renderer.setRenderTarget(rtA);
+    const shadows = renderer.compileAsync(cast, cam);
+    renderer.setRenderTarget(rtB);
+    const blurs = renderer.compileAsync(quadScene, quadCam);
+    renderer.setRenderTarget(prev);
+    return Promise.all([shadows, blurs]);
+  };
+
   return {
     cam,
     render,
+    compileAsync,
     catcher,
     size: new THREE.Vector2(o.w, o.h),
     dispose() {

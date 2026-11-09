@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Guides, GUIDE, hairMaterial, lockMesh, type LockShape } from "./strands";
 import { softShadow } from "./shadow";
+import { nextFrame, type FrameWatch } from "../live3d";
 
 /**
  * The hero in 3D. Two canvases sandwich the masthead's paper (an SVG in the page):
@@ -82,6 +83,8 @@ export type HeroHairOptions = {
   /** Read each frame: the scroll scene's zoom and progress. */
   state?: () => HeroState;
   dpr?: number;
+  /** Told about every frame drawn on screen, and every pause. */
+  watch?: FrameWatch;
 };
 
 export type HeroHair = {
@@ -89,6 +92,8 @@ export type HeroHair = {
   setScroll(s: HeroState): void;
   setVisible(v: boolean): void;
   resize(): void;
+  /** Stop for good: no more frames (the canvases keep the last one while they fade out). */
+  stop(): void;
   /** The lock pours in over the type. */
   intro(): void;
   onReady(cb: () => void): void;
@@ -148,17 +153,19 @@ function place(cam: THREE.PerspectiveCamera, w: number, h: number, o: { zoom: nu
 export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
   const dpr = opts.dpr ?? Math.min(window.devicePixelRatio || 1, 1.5);
   const mk = (canvas: HTMLCanvasElement, alpha: boolean) => {
-    const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha, premultipliedAlpha: true, powerPreference: "high-performance", preserveDrawingBuffer: !!opts.still });
-    r.setPixelRatio(dpr);
+    // Live: a real graphics chip or nothing (the still stays); stills are rendered headless, where that may be software
+    const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha, premultipliedAlpha: true, powerPreference: "high-performance", failIfMajorPerformanceCaveat: !opts.still, preserveDrawingBuffer: !!opts.still });
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.toneMapping = THREE.NeutralToneMapping;
     r.toneMappingExposure = 1.0;
     return r;
   };
+  // Built in steps, a painted frame between them, so the page never waits long on the GPU process
   const back = mk(opts.back, false);
+  await nextFrame();
   const front = mk(opts.front, true);
   front.setClearColor(0x000000, 0);
-
+  await nextFrame();
   const origin = new THREE.Vector2(opts.origin.x, -opts.origin.y);
   const cam = new THREE.PerspectiveCamera();
 
@@ -193,6 +200,7 @@ export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
   );
   glow.position.set(800, -500, -1400);
   backScene.add(glow);
+  await nextFrame();
 
   // ── Front: one lock over the type, and its shadow on the paper ─────────
   const frontScene = new THREE.Scene();
@@ -258,10 +266,14 @@ export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
     return { w: Math.max(1, w), h: Math.max(1, h) };
   };
 
+  // Only when the size really changes: every new size reallocates both canvases' buffers
+  let sized = "";
   const resize = () => {
     const { w, h } = size();
-    back.setSize(w, h, false);
-    front.setSize(w, h, false);
+    if (sized === `${w}x${h}`) return;
+    sized = `${w}x${h}`;
+    back.setDrawingBufferSize(w, h, dpr);
+    front.setDrawingBufferSize(w, h, dpr);
     riverMat.uniforms.uRes.value.set(w * dpr, h * dpr);
     lockMat.uniforms.uRes.value.set(w * dpr, h * dpr);
   };
@@ -377,9 +389,11 @@ export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
     }
   };
 
+  let stopped = false;
   const loop = (now: number) => {
     raf = 0;
-    if (!visible) return;
+    if (!visible || stopped) return;
+    opts.watch?.tick(now);
     frame(now);
     raf = requestAnimationFrame(loop);
     if (!readyFired) {
@@ -388,18 +402,32 @@ export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
     }
   };
   const run = () => {
-    if (!raf && visible && !opts.still) {
+    if (!raf && visible && !opts.still && !stopped) {
+      opts.watch?.gap();
       last = performance.now();
       raf = requestAnimationFrame(loop);
     }
   };
 
+  await nextFrame();
   resize();
-  // Compile both programs before the first visible frame, so the fade-in never stutters
+  await nextFrame();
+  // Every program compiled (off the main thread where the browser can), before anything is shown
   pose(0, opts.still ? 1 : 0);
   place(cam, size().w, size().h, { zoom: 1, beyond: 0, par: new THREE.Vector2(), origin });
-  await Promise.all([back.compileAsync(backScene, cam), front.compileAsync(frontScene, cam), front.compileAsync(shadowScene, shadow.cam)]).catch(() => {});
-  if (!opts.still) run();
+  await Promise.all([back.compileAsync(backScene, cam), front.compileAsync(frontScene, cam), shadow.compileAsync()]).catch(() => {});
+  if (!opts.still) {
+    // One whole frame drawn unseen (the canvases are still transparent): the lock, its shadow pass and the
+    // render targets too, which the loop only draws once the intro starts. Then the loop runs.
+    await nextFrame();
+    frame(performance.now());
+    await nextFrame();
+    shadowPass();
+    front.render(frontScene, cam);
+    front.clear();
+    await nextFrame();
+    run();
+  }
 
   return {
     setPointer(x, y, isIn) {
@@ -419,6 +447,11 @@ export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
       }
     },
     resize,
+    stop() {
+      stopped = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    },
     intro() {
       introAt = performance.now();
     },
@@ -428,6 +461,7 @@ export async function createHeroHair(opts: HeroHairOptions): Promise<HeroHair> {
     },
     renderStill(kind, w, h) {
       // Same camera as the live scene at rest; the still covers `w/h` around the viewBox
+      sized = "";
       back.setPixelRatio(1);
       front.setPixelRatio(1);
       back.setSize(w, h, false);

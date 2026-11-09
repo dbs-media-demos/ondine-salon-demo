@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { PHONE_QUERY } from "@/lib/motion";
-import { afterLoad, canRun3D } from "@/components/home/useHeroHair";
+import { canRun3D, fallBack, frameWatch, hasGpu, inTurn, onFallBack, stillsOnly, whenIdle } from "@/components/fx/live3d";
 import type { ShadeCard as Scene } from "@/components/fx/hair/shadeScene";
 
 export type ShadeView = {
@@ -29,9 +29,11 @@ const START = 2;
 /**
  * "Find your shade": a colourist's swatch tresses, one per shade, and what each costs. Every device
  * gets the shade buttons and the answer as real text, over a still rendered from the 3D card
- * (scripts/render-hair-stills.mjs). On a desktop with a mouse, once the card comes near, the live 3D
- * fades in over the still: the cursor brushes through the tresses, scrolling stirs them, and the chosen
- * one swings forward into the light. Clicking a tress picks it, like the buttons.
+ * (scripts/render-hair-stills.mjs). On a desktop with a mouse and a real graphics chip, the live 3D is
+ * built, compiled and drawn once unseen while the browser is idle after the hero has started (not when the
+ * card is reached), and fades in over the still: the cursor brushes through the tresses, scrolling stirs
+ * them, and the chosen one swings forward into the light. Clicking a tress picks it, like the buttons.
+ * Too slow in its first 2 s on screen, and it fades back to the still (live3d.ts).
  */
 export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; groupLabel: string; bookLabel: string; stillAlt: string; shades: ShadeView[] }) {
   const [sel, setSel] = useState(START);
@@ -45,55 +47,80 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
     const el = stage.current;
     const cv = canvas.current;
     if (!el || !cv || !canRun3D()) return;
-    let cancelled = false;
+    const abort = new AbortController();
+    const cancelled = () => abort.signal.aborted;
     const off: (() => void)[] = [];
+    let sc: Scene | undefined;
+    let gone = 0;
 
-    const start = async () => {
-      let sc: Scene;
+    // The canvas fades back to the still (CSS, 0.7 s), then the renderer is freed
+    const giveUp = () => {
+      if (!sc || cancelled()) return;
+      const dead = sc;
+      dead.stop();
+      off.forEach((f) => f());
+      off.length = 0;
+      scene.current = null;
+      setLive(false);
+      gone = window.setTimeout(() => {
+        dead.dispose();
+        if (sc === dead) sc = undefined;
+      }, 800);
+    };
+
+    void inTurn(async () => {
+      if (!(await whenIdle(abort.signal)) || stillsOnly() || !hasGpu()) return;
+      performance.mark("3d:shades:start");
       try {
         const { createShades } = await import("@/components/fx/hair/shadeScene");
-        if (cancelled) return;
-        sc = await createShades(cv, { shades: p.shades.map((x) => ({ root: x.root, tip: x.tip })) });
-        if (cancelled) return sc.dispose();
+        if (cancelled()) return;
+        const watch = frameWatch((ok) => {
+          performance.mark(`3d:shades:${ok ? "smooth" : "slow"}`);
+          if (!ok) fallBack("shades");
+        });
+        sc = await createShades(cv, { shades: p.shades.map((x) => ({ root: x.root, tip: x.tip })), watch });
+        if (cancelled()) return sc.dispose();
       } catch {
-        return; // no WebGL: the still stays
+        return; // no WebGL, or no real graphics chip: the still stays
       }
-      scene.current = sc;
-      sc.select(START);
-      sc.onReady(() => !cancelled && setLive(true));
-      const io = new IntersectionObserver(([e]) => sc.setVisible(e.isIntersecting));
+      const live = sc;
+      scene.current = live;
+      live.select(START);
+      off.push(onFallBack(giveUp));
+      // Drawn once already: the canvas fades in now, wherever the card is, and runs once it's on screen
+      performance.mark("3d:shades:live");
+      setLive(true);
+
+      let onScreen = false;
+      const sync = () => live.setVisible(onScreen && document.visibilityState === "visible");
+      const io = new IntersectionObserver(([e]) => {
+        onScreen = e.isIntersecting;
+        sync();
+      });
       io.observe(el);
-      const ro = new ResizeObserver(() => sc.resize());
+      const ro = new ResizeObserver(() => live.resize());
       ro.observe(cv);
       let lastY = window.scrollY;
       const onScroll = () => {
-        sc.stir(window.scrollY - lastY);
+        live.stir(window.scrollY - lastY);
         lastY = window.scrollY;
       };
       window.addEventListener("scroll", onScroll, { passive: true });
+      document.addEventListener("visibilitychange", sync);
       off.push(() => {
         io.disconnect();
         ro.disconnect();
         window.removeEventListener("scroll", onScroll);
-        sc.dispose();
-        scene.current = null;
+        document.removeEventListener("visibilitychange", sync);
       });
-    };
+    });
 
-    // Fetched only when the card is near and the page has settled
-    const near = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        near.disconnect();
-        off.push(afterLoad(() => void start(), 0));
-      },
-      { rootMargin: "800px 0px" },
-    );
-    near.observe(el);
     return () => {
-      cancelled = true;
-      near.disconnect();
+      abort.abort();
+      window.clearTimeout(gone);
       off.forEach((f) => f());
+      sc?.dispose();
+      scene.current = null;
     };
     // Mounted once
     // eslint-disable-next-line react-hooks/exhaustive-deps
