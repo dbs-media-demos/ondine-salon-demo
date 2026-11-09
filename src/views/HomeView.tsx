@@ -25,8 +25,12 @@ import { services } from "@/content/services";
 import { site } from "@/lib/site";
 import { PreviewMap } from "@/components/preview/PreviewMap";
 import { SnipRule } from "@/components/home/SnipRule";
-import { formatRsd } from "@/content/prices";
-import { num, openDays, type Biz } from "@/lib/biz-core";
+import { formatRsd, minPrice, priceItemById } from "@/content/prices";
+import { shades } from "@/content/shades";
+import { team } from "@/content/team";
+import { ShadeCard, type ShadeView } from "@/components/home/ShadeCard";
+import { bookingHref } from "@/lib/routes";
+import { num, openDays, telOf, type Biz } from "@/lib/biz-core";
 
 const copy = {
   sr: {
@@ -85,6 +89,17 @@ const copy = {
     ),
     teamHint: "Prikaži radove",
     teamAll: "Upoznajte tim",
+    shadesEyebrow: "Karta nijansi",
+    shadesTitle: (
+      <>
+        Nađite <em>svoju</em> nijansu.
+      </>
+    ),
+    shadesText: "Šest nijansi koje najčešće radimo. Izaberite jednu i odmah vidite tehniku, trajanje i cenu.",
+    shadesGroup: "Nijanse",
+    shadesBook: "Zakaži ovu nijansu",
+    shadesStylist: "Stilista",
+    shadesAlt: "Šest pramenova kose, od espresso smeđe do peščano plave, okačenih o mesingani štap",
   },
   en: {
     eyebrow: "Hair & beauty atelier — Dorćol, Belgrade",
@@ -141,6 +156,17 @@ const copy = {
     ),
     teamHint: "Show work",
     teamAll: "Meet the team",
+    shadesEyebrow: "Shade card",
+    shadesTitle: (
+      <>
+        Find <em>your</em> shade.
+      </>
+    ),
+    shadesText: "Six shades we colour most. Pick one to see the technique, the time and the price.",
+    shadesGroup: "Shades",
+    shadesBook: "Book this shade",
+    shadesStylist: "Stylist",
+    shadesAlt: "Six hair swatches, from espresso brown to sand blonde, hanging from a brass rod",
   },
 };
 
@@ -154,6 +180,31 @@ export function homeMetadata(locale: Locale): Metadata {
     alternates: pagePaths.home,
     eyebrow: d.descriptor,
     ogImage: "/images/look-golden-waves.jpg",
+  });
+}
+
+/** 210 → "3 h 30 min" */
+const duration = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}`);
+
+/** The shade card's answers, written on the server (no number formatting in the browser). */
+function shadeViews(locale: Locale, biz?: Biz): ShadeView[] {
+  const d = getDictionary(locale);
+  const c = copy[locale];
+  return shades.map((x) => {
+    const item = priceItemById(x.item)!;
+    const member = team.find((m) => m.id === x.stylist);
+    return {
+      id: x.id,
+      name: x.name[locale],
+      description: x.description[locale],
+      service: `${item.name[locale]} · ${duration(item.duration)}`,
+      // English previews have no dinar prices; previews have no Ondine team
+      price: biz && locale === "en" ? undefined : `${d.from} ${formatRsd(minPrice(item.price), locale)}`,
+      stylist: biz || !member ? undefined : `${c.shadesStylist}: ${member.name}`,
+      bookHref: bookingHref(locale, { service: item.id, stylist: biz ? undefined : x.stylist }),
+      root: x.root,
+      tip: x.tip,
+    };
   });
 }
 
@@ -224,7 +275,17 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
         rating={rating ? { value: rating.value, label: `${num({ lang: locale }, rating.value)} · ${rating.count} ${reviewsWord}` } : undefined}
         fromPrice={fromPrice}
         photoAlt={c.photoAlt}
+        phone={biz ? biz.phoneDisplay : site.phone}
+        phoneHref={biz ? (telOf(biz) ?? "") : site.phoneHref}
+        callLabel={d.call}
       />
+
+      {/* Phones: the hero's lock of hair, a still from the desktop scene, lying across the page */}
+      <div aria-hidden className="theme-cream hidden overflow-hidden phone:order-1 phone:block">
+        {/* A still pre-rendered with alpha at two fixed sizes, so no image optimiser touches it */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/hair/lock-750.webp" srcSet="/images/hair/lock-750.webp 750w, /images/hair/lock-1125.webp 1125w" sizes="100vw" width={1125} height={470} alt="" loading="lazy" decoding="async" fetchPriority="low" className="block h-auto w-full" />
+      </div>
 
       {/* Manifesto */}
       <section className="theme-cream relative overflow-hidden py-28 md:py-44 phone:order-9 phone:py-12" aria-label={c.manifestoEyebrow}>
@@ -293,6 +354,19 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
           </div>
           <ServiceIndex rows={serviceRows(locale)} cursorLabel={d.view} />
         </div>
+      </section>
+
+      {/* Shade card: the 3D tresses (desktop) or their still, and what each shade costs */}
+      <section className="theme-blush relative overflow-hidden py-24 md:py-36 phone:order-6 phone:py-12" aria-labelledby="shades-title">
+        <ShadeCard
+          eyebrow={c.shadesEyebrow}
+          title={c.shadesTitle}
+          text={c.shadesText}
+          groupLabel={c.shadesGroup}
+          bookLabel={c.shadesBook}
+          stillAlt={c.shadesAlt}
+          shades={shadeViews(locale, biz)}
+        />
       </section>
 
       <LookbookRail

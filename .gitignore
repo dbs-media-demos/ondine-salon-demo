@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# previews written by scripts/render-hair-stills.mjs --preview
+scripts/.preview-*

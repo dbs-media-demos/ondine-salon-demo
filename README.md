@@ -8,7 +8,7 @@ npm run dev      # http://localhost:3000
 npm run build && npm start
 ```
 
-- **Stack:** Next.js 16 (App Router, Turbopack), React 19.2, Tailwind CSS v4, GSAP (ScrollTrigger, SplitText) + Lenis.
+- **Stack:** Next.js 16 (App Router, Turbopack), React 19.2, Tailwind CSS v4, GSAP (ScrollTrigger, SplitText) + Lenis, three.js for the desktop-only 3D hair (`src/components/fx/hair`; stills via `scripts/render-hair-stills.mjs`).
 - **Content:** `src/content/*` (services, bilingual price list in RSD, team, lookbook, reviews, FAQ). UI strings in `src/i18n/dictionary.ts`.
 - **Routing:** two root layouts, `src/app/(sr)` and `src/app/(en)/en`, with localized slugs from `src/lib/routes.ts`; views in `src/views`.
 - **Indexing:** the demo is `noindex` (meta, header and robots.txt) unless `NEXT_PUBLIC_NOINDEX=false`.

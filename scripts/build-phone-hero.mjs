@@ -5,7 +5,7 @@ const src = "public/images/look-red-wind.jpg";
 const crop = { left: 0, top: 0, width: 1333, height: 2000 };
 
 for (const [w, avif, webp] of [
-  [750, 60, 70],
+  [750, 50, 70],
   [1125, 52, 60],
 ]) {
   const base = () => sharp(src).extract(crop).resize({ width: w }).sharpen({ sigma: 0.5 });
