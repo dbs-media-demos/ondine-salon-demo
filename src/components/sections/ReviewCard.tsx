@@ -11,7 +11,9 @@ import { srPreview } from "@/i18n/sr-preview";
 export function ReviewCard({ r, locale, className, area }: { r: Review; locale: Locale; className?: string; area?: string }) {
   const d = getDictionary(locale);
   // A preview's sample reviews don't name the concept salon's stylists
-  const text = area ? ((locale === "sr" ? srPreview : enPreview)[r.text[locale]] ?? r.text[locale]) : r.text[locale];
+  // `area` set (even "") = a preview's card
+  const preview = area !== undefined;
+  const text = preview ? ((locale === "sr" ? srPreview : enPreview)[r.text[locale]] ?? r.text[locale]) : r.text[locale];
   const date = new Intl.DateTimeFormat(locale === "sr" ? "sr-Latn-RS" : "en-GB", { month: "long", year: "numeric" }).format(new Date(r.date));
   return (
     <figure className={clsx("flex flex-col justify-between gap-8 bg-surface p-7 md:p-8 phone:gap-3 phone:p-4", className)}>
@@ -32,7 +34,7 @@ export function ReviewCard({ r, locale, className, area }: { r: Review; locale: 
         <span>
           <span className="block font-medium">{r.name}</span>
           <span className="text-muted">
-            {area ? `${area} · ${serviceById(r.service).short[locale]}` : `${r.area} · ${serviceById(r.service).short[locale]} · ${stylistById(r.stylist)?.name.split(" ")[0]}`}
+            {preview ? `${area ? `${area} · ` : ""}${serviceById(r.service).short[locale]}` : `${r.area} · ${serviceById(r.service).short[locale]} · ${stylistById(r.stylist)?.name.split(" ")[0]}`}
           </span>
         </span>
       </figcaption>

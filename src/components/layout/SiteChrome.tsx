@@ -58,6 +58,8 @@ export function SiteChrome({ locale, biz, children }: { locale: Locale; biz?: Bi
         instagram={biz ? "" : site.instagram}
         instagramUrl={site.instagramUrl}
         brandName={biz?.shortName}
+        brandLogo={biz?.logo?.svg}
+        areaLabel={biz?.area}
       />
       {children}
       <Footer

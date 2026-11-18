@@ -11,6 +11,8 @@ const securityHeaders = [
 const noindex = process.env.NEXT_PUBLIC_NOINDEX !== "false";
 
 const nextConfig: NextConfig = {
+  // A second dev server (tests) can build into its own folder and leave the running demo's .next alone
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],

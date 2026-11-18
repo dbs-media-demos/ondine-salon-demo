@@ -392,6 +392,140 @@ html.lenis body {
   background-size: 100% 1px;
 }
 
+/* ─────────────────── a preview's own logo ───────────────────
+   LeadLogo: sized by its viewBox (--logo-a), ink in currentColor, its name forced onto Playfair
+   (the CRM's font-family names the font, but next/font registers it under a hashed name). */
+.lead-logo {
+  display: block;
+  aspect-ratio: var(--logo-a, 4);
+}
+.lead-logo > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.lead-logo [data-part="word"] text {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+/* LeadLoader: cream paper over everything on a preview's first view in a tab. Its inline script sets
+   html[data-loading] while it shows, then data-loader = out (or skip-out, fade) and finally done. */
+.lead-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: grid;
+  place-items: center;
+  clip-path: inset(0 0 0 0);
+  /* Never more than 3 s, even if its script never ran */
+  animation: lead-failsafe 0.3s linear 3s forwards;
+}
+.lead-loader::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-loader="skip"] .lead-loader,
+html[data-loader="done"] .lead-loader {
+  display: none;
+}
+.lead-loader__logo {
+  width: min(64vw, 520px);
+  max-height: 46vh;
+  max-width: calc(46vh * var(--logo-a, 4));
+}
+/* The mark's outlines draw one after another (pathLength=1 on each shape), then their fills come in */
+.lead-loader [data-part="mark"] :is(path, circle, rect, line, polyline, polygon, ellipse) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill-opacity: 0;
+  animation:
+    lead-draw 0.95s var(--ease-in-out-quart) calc(0.12s + var(--i, 0) * 0.11s) forwards,
+    lead-fill 0.5s ease-out 0.95s forwards;
+}
+.lead-loader [data-part="mark"] :nth-child(2) { --i: 1; }
+.lead-loader [data-part="mark"] :nth-child(3) { --i: 2; }
+.lead-loader [data-part="mark"] :nth-child(4) { --i: 3; }
+.lead-loader [data-part="mark"] :nth-child(5) { --i: 4; }
+.lead-loader [data-part="mark"] :nth-child(n + 6) { --i: 5; }
+/* The name rises out of a mask */
+.lead-loader [data-part="word"] {
+  transform-box: fill-box;
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(22%);
+  animation: lead-word 1s var(--ease-out-expo) 0.55s forwards;
+}
+/* Exit: the paper wipes up off the page as the logo lifts */
+html[data-loader="out"] .lead-loader {
+  animation: lead-wipe 0.85s var(--ease-in-out-quart) both;
+}
+html[data-loader="skip-out"] .lead-loader {
+  animation: lead-wipe 0.5s var(--ease-in-out-quart) both;
+}
+html[data-loader="fade"] .lead-loader {
+  animation: lead-fade 0.4s ease both !important;
+}
+html[data-loader="out"] .lead-loader__logo,
+html[data-loader="skip-out"] .lead-loader__logo {
+  animation: lead-lift 0.6s var(--ease-in-out-quart) both;
+}
+html[data-loader="skip-out"] .lead-loader__logo :is([data-part], [data-part] *) {
+  /* A skip shows the finished logo for its short exit */
+  animation-duration: 0.01ms;
+  animation-delay: 0s;
+}
+@keyframes lead-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes lead-fill {
+  to {
+    fill-opacity: 1;
+  }
+}
+@keyframes lead-word {
+  to {
+    clip-path: inset(-30% -4% -30% -4%);
+    transform: none;
+  }
+}
+@keyframes lead-wipe {
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+@keyframes lead-lift {
+  to {
+    transform: translateY(-7vh);
+    opacity: 0;
+  }
+}
+@keyframes lead-fade {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes lead-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+/* The hero's own entrance waits under the loader (the 3D and /v2 locks wait in JS: lib/loader.ts) */
+html[data-loading] .masthead-letters,
+html[data-loading] .logo-wave,
+html[data-loading] .hero-sheen::before,
+html[data-loading] .anim-heading,
+html[data-loading] .anim-fade,
+html[data-loading] .anim-img {
+  animation-play-state: paused;
+}
+
 /* ─────────────────────── page transitions ─────────────────────── */
 
 ::view-transition-old(.page) {
@@ -478,6 +612,10 @@ html.lenis body {
   .t-lead {
     font-size: 1rem;
     line-height: 1.5;
+  }
+
+  .lead-loader__logo {
+    width: 78vw;
   }
 
   /* Paint first, no intros */
@@ -698,5 +836,10 @@ html.lenis body {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+  /* The loader shows its finished logo at once (then fades: html[data-loader="fade"]) */
+  .lead-loader__logo,
+  .lead-loader__logo * {
+    animation-delay: 0s !important;
   }
 }

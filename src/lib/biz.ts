@@ -23,4 +23,6 @@ export const defaultBiz: Biz = {
   hoursSummary: "Uto–sub 9–21 h",
   rating: { ...site.rating },
   preview: false,
+  logo: null,
+  areas: [],
 };

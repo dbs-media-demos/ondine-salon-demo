@@ -28,6 +28,10 @@ export type Biz = {
   rating: { value: number; count: number } | null;
   /** A personalised preview: other pages say "comes with the full site" */
   preview: boolean;
+  /** The business's own logo from the CRM (sanitised SVG: a `mark` and a `word` part in currentColor); null = the name as text */
+  logo: { svg: string } | null;
+  /** Up to 8 towns / neighbourhoods they serve, their own town first ([] = only `area`) */
+  areas: string[];
 };
 
 export const telOf = (biz: Pick<Biz, "phone">) => (biz.phone ? `tel:${biz.phone}` : undefined);
@@ -111,6 +115,11 @@ export function openStatus(biz: Pick<Biz, "hours" | "timezone" | "lang">, date =
   return { open: false, text: sr ? "Zatvoreno" : "Closed" };
 }
 
+const logoOf = (v: unknown): Biz["logo"] => {
+  const svg = v && typeof v === "object" ? (v as { svg?: unknown }).svg : undefined;
+  return typeof svg === "string" && /^\s*<svg[\s>]/i.test(svg) ? { svg } : null;
+};
+
 /** What the CRM sends (GET /api/demos/public/<token>) → a preview Biz. */
 export function bizFromCrm(b: Record<string, unknown> & { address: Biz["address"] }, fallbackTz: string): Biz {
   const s = (v: unknown) => (typeof v === "string" ? v : "");
@@ -129,6 +138,8 @@ export function bizFromCrm(b: Record<string, unknown> & { address: Biz["address"
     hoursSummary: s(b.hoursSummary),
     rating: (b.rating as Biz["rating"]) ?? null,
     preview: true,
+    logo: logoOf(b.logo),
+    areas: Array.isArray(b.areas) ? (b.areas as unknown[]).filter((a): a is string => typeof a === "string" && a.trim() !== "").map((a) => a.trim()).slice(0, 8) : [],
   };
 }
 

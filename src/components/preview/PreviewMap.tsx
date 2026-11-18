@@ -34,6 +34,12 @@ export function PreviewMap({ biz, locale, className }: { biz: Biz; locale: Local
                 <p className="font-serif text-[1.6rem] leading-snug phone:text-[1.25rem]">{biz.address.full}</p>
               </>
             )}
+            {biz.areas.length > 1 && (
+              <>
+                <p className="t-eyebrow mb-3 mt-8 text-muted phone:mb-1.5 phone:mt-4">{sr ? "Dolaze nam iz" : "Serving"}</p>
+                <p className="max-w-md leading-relaxed">{biz.areas.join(" · ")}</p>
+              </>
+            )}
             <OpenBadge locale={locale} className="mt-8 text-[0.9rem] phone:mt-4 phone:whitespace-nowrap" />
             {biz.hours && (
               <dl className="mt-4 grid max-w-xs grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-muted">

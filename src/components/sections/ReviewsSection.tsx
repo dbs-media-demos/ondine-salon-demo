@@ -15,10 +15,12 @@ import type { Biz } from "@/lib/biz-core";
 /** Google-style rating summary + two counter-moving marquees of review cards (phones: full cards in a stack, the rest in a swipe rail). */
 export function ReviewsSection({ locale, biz, className }: { locale: Locale; biz?: Biz; className?: string }) {
   const rating = biz ? biz.rating : site.rating;
-  const area = biz?.area;
   const d = getDictionary(locale);
   // Previews skip the two reviews about visiting Belgrade
   const list = biz ? reviews.filter((r) => r.id !== "r2" && r.id !== "r10") : reviews;
+  // A preview's reviewers come from the towns it serves (its own town only, when the CRM has none)
+  const towns = biz ? (biz.areas.length ? biz.areas : [biz.area]) : [];
+  const areaOf = (id: string) => (biz ? towns[Math.max(0, list.findIndex((r) => r.id === id)) % towns.length] : undefined);
   const a = list.slice(0, 6);
   const b = list.slice(6);
   return (
@@ -57,12 +59,12 @@ export function ReviewsSection({ locale, biz, className }: { locale: Locale; biz
       {/* Phones */}
       <div className="wrap mt-5 hidden space-y-3 phone:block">
         {list.slice(0, 4).map((r) => (
-          <ReviewCard key={r.id} r={r} locale={locale} area={area} />
+          <ReviewCard key={r.id} r={r} locale={locale} area={areaOf(r.id)} />
         ))}
       </div>
       <div className="no-scrollbar mt-3 hidden snap-x snap-mandatory scroll-pl-[var(--gutter)] gap-3 overflow-x-auto px-[var(--gutter)] phone:flex">
         {list.slice(4).map((r) => (
-          <ReviewCard key={r.id} r={r} locale={locale} area={area} className="w-[80vw] max-w-[26rem] shrink-0 snap-start" />
+          <ReviewCard key={r.id} r={r} locale={locale} area={areaOf(r.id)} className="w-[80vw] max-w-[26rem] shrink-0 snap-start" />
         ))}
       </div>
       <div className="wrap mt-4 hidden phone:block">
@@ -74,12 +76,12 @@ export function ReviewsSection({ locale, biz, className }: { locale: Locale; biz
       <div className="mt-16 space-y-4 md:mt-24 phone:hidden">
         <Marquee duration={70}>
           {a.map((r) => (
-            <ReviewCard key={r.id} r={r} locale={locale} area={area} className="mr-4 w-[82vw] max-w-[26rem] shrink-0 self-stretch" />
+            <ReviewCard key={r.id} r={r} locale={locale} area={areaOf(r.id)} className="mr-4 w-[82vw] max-w-[26rem] shrink-0 self-stretch" />
           ))}
         </Marquee>
         <Marquee duration={80} reverse>
           {b.map((r) => (
-            <ReviewCard key={r.id} r={r} locale={locale} area={area} className="mr-4 w-[82vw] max-w-[26rem] shrink-0 self-stretch" />
+            <ReviewCard key={r.id} r={r} locale={locale} area={areaOf(r.id)} className="mr-4 w-[82vw] max-w-[26rem] shrink-0 self-stretch" />
           ))}
         </Marquee>
       </div>

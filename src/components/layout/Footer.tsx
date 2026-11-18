@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/Logo";
+import { LeadLogo } from "@/components/brand/LeadLogo";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { Button } from "@/components/ui/Button";
 import { SplitReveal } from "@/components/ui/Reveal";
@@ -131,7 +132,12 @@ export function Footer({ locale, biz, pill }: { locale: Locale; biz?: Biz; pill?
       </div>
 
       <div className="wrap" aria-hidden>
-        {biz ? (
+        {biz?.logo ? (
+          // The business's own logo, as large as Ondine's wordmark would be (a long one fills the width)
+          <div className="pb-8 text-cream/95 [--logo-h:15vw] phone:pb-6 phone:[--logo-h:22vw]">
+            <LeadLogo svg={biz.logo.svg} style={{ width: "min(100%, calc(var(--logo-h) * var(--logo-a)))" }} />
+          </div>
+        ) : biz ? (
           <p className="pb-6 font-serif text-[clamp(3rem,11vw,12rem)] leading-[0.9] tracking-[-0.03em] text-cream/95 [overflow-wrap:anywhere]">{biz.shortName}</p>
         ) : (
           <Logo className="w-full text-cream/95" title="" />

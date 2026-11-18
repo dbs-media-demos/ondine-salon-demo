@@ -3,6 +3,7 @@
 import { useEffect, useState, type RefObject } from "react";
 import type { HeroHair, HeroState } from "@/components/fx/hair/heroScene";
 import { canRun3D, fallBack, frameWatch, hasGpu, inTurn, onFallBack, stillsOnly, whenIdle } from "@/components/fx/live3d";
+import { whenLoaderDone } from "@/lib/loader";
 
 /**
  * The hero's live hair. The server HTML carries a still rendered from this scene (scripts/render-hair-stills.mjs),
@@ -78,7 +79,8 @@ export function useHeroHair(o: {
         if (cancelled() || !h) return;
         performance.mark("3d:hero:live");
         setOn(true);
-        scene.intro();
+        // A preview's logo loader may still cover the page: the lock pours in as it lifts
+        off.push(whenLoaderDone(() => scene.intro()));
       });
 
       let onScreen = true;

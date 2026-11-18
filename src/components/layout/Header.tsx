@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { Logo } from "@/components/brand/Logo";
+import { LeadLogo } from "@/components/brand/LeadLogo";
 import { Magnetic } from "@/components/ui/Magnetic";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import type { Locale } from "@/lib/i18n";
@@ -31,6 +32,10 @@ type Props = {
   instagramUrl: string;
   /** A preview's business name, shown instead of the Ondine wordmark. */
   brandName?: string;
+  /** A preview's own logo (SVG from the CRM), shown instead of the name. */
+  brandLogo?: string;
+  /** The town over the menu's address ("Dorćol" on the concept site). */
+  areaLabel?: string;
 };
 
 export function Header(p: Props) {
@@ -129,7 +134,9 @@ export function Header(p: Props) {
             className="relative z-10 -ml-1 p-1"
             aria-label={`${p.brandName ?? "Ondine"} — ${p.locale === "sr" ? "početna" : "home"}`}
           >
-            {p.brandName ? (
+            {p.brandLogo ? (
+              <LeadLogo svg={p.brandLogo} className="h-7 max-w-[11.5rem] md:h-10 md:max-w-[19rem]" />
+            ) : p.brandName ? (
               <span className="block max-w-[13rem] truncate font-serif text-[1.45rem] leading-none tracking-[-0.01em] md:max-w-[20rem] md:text-[1.7rem]">{p.brandName}</span>
             ) : (
               <Logo className="h-[1.35rem] w-auto md:h-6" animate />
@@ -250,7 +257,7 @@ export function Header(p: Props) {
             </div>
             <div className="grid gap-6 text-[0.95rem] text-muted sm:grid-cols-2">
               <div>
-                <p className="t-eyebrow mb-3 text-champagne">Dorćol</p>
+                <p className="t-eyebrow mb-3 text-champagne">{p.areaLabel ?? "Dorćol"}</p>
                 <p>{p.address}</p>
                 <a href={p.phoneHref} className="mt-1 block text-cream hover:text-blush">
                   {p.phone}

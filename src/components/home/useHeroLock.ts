@@ -4,6 +4,7 @@ import { useEffect, useState, type RefObject } from "react";
 import type { Lock2D, LockState } from "@/components/fx/hair/lock2d";
 import { whenIdle } from "@/components/fx/live3d";
 import { PHONE_QUERY, prefersReducedMotion } from "@/lib/motion";
+import { whenLoaderDone } from "@/lib/loader";
 
 /**
  * The /v2 hero's lock of hair, drawn in canvas 2D (fx/hair/lock2d.ts): no three.js and no WebGL anywhere.
@@ -38,7 +39,8 @@ export function useHeroLock(o: {
       const l = createLock2D({ front, shadow, state: () => o.state.current, still });
       lock = l;
       setOn(true);
-      l.intro();
+      // A preview's logo loader may still cover the page: the lock lays itself down as it lifts
+      off.push(whenLoaderDone(() => l.intro()));
 
       let onScreen = true;
       const sync = () => l.setVisible(onScreen && document.visibilityState === "visible");

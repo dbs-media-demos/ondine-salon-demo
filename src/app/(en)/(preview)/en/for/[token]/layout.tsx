@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { BizProvider } from "@/components/preview/BizContext";
 import { PreviewGuard } from "@/components/preview/PreviewGuard";
+import { LeadLoader } from "@/components/preview/LeadLoader";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { previewBiz } from "@/lib/preview";
 
@@ -18,6 +19,7 @@ export default async function PreviewLayout({ children, params }: { children: Re
   if (biz.lang !== "en") return children;
   return (
     <BizProvider biz={biz}>
+      {biz.logo && <LeadLoader token={token} svg={biz.logo.svg} />}
       <SiteChrome locale="en" biz={biz}>
         {children}
       </SiteChrome>
