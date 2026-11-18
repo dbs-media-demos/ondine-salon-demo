@@ -232,12 +232,16 @@ function previewCopy(locale: Locale, biz: Biz) {
   };
 }
 
+/** "3d": the full homepage (/). "2d": /v2, the same page with a 2D hero and no three.js anywhere. */
+export type HeroKind = "3d" | "2d";
+
 /**
- * The homepage. A personalised preview (/for/<token>, /en/for/<token>) passes a real business:
+ * The homepage, one tree for both versions: `hero` switches only the hero and the shade card's live 3D.
+ * A personalised preview (/for/<token>, /en/for/<token>) passes a real business:
  * its name is cut into the masthead, its rating, hours and a map of its address replace Ondine's,
  * and the fictional team and Instagram step aside (and the dinar price list on English previews).
  */
-export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
+export function HomeView({ locale, biz, hero = "3d" }: { locale: Locale; biz?: Biz; hero?: HeroKind }) {
   const d = getDictionary(locale);
   const c = biz ? previewCopy(locale, biz) : copy[locale];
   const rating = biz ? biz.rating : site.rating;
@@ -278,6 +282,7 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
         phone={biz ? biz.phoneDisplay : site.phone}
         phoneHref={biz ? (telOf(biz) ?? "") : site.phoneHref}
         callLabel={d.call}
+        fx={hero}
       />
 
       {/* Phones: the hero's lock of hair, a still from the desktop scene, lying across the page */}
@@ -366,6 +371,7 @@ export function HomeView({ locale, biz }: { locale: Locale; biz?: Biz }) {
           bookLabel={c.shadesBook}
           stillAlt={c.shadesAlt}
           shades={shadeViews(locale, biz)}
+          live3d={hero === "3d"}
         />
       </section>
 

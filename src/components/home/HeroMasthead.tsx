@@ -9,6 +9,7 @@ import { Magnetic } from "@/components/ui/Magnetic";
 import { OpenBadge } from "@/components/ui/OpenBadge";
 import { Stars } from "@/components/ui/Stars";
 import { useHeroHair } from "@/components/home/useHeroHair";
+import { useHeroLock } from "@/components/home/useHeroLock";
 import type { HeroState } from "@/components/fx/hair/heroScene";
 import type { Locale } from "@/lib/i18n";
 
@@ -53,6 +54,8 @@ type Props = {
   phone: string;
   phoneHref: string;
   callLabel: string;
+  /** "3d": the live 3D room and lock (/). "2d": /v2, no three.js at all; a canvas-2D lock and a CSS sheen. */
+  fx?: "3d" | "2d";
 };
 
 /**
@@ -69,7 +72,9 @@ export function HeroMasthead(p: Props) {
   const back = useRef<HTMLCanvasElement>(null);
   const front = useRef<HTMLCanvasElement>(null);
   const state = useRef<HeroState>({ zoom: 1, progress: 0 });
-  const live = useHeroHair({ root, back, front, state, origin: dOrigin, named: !!p.name });
+  const flat = p.fx === "2d";
+  const live = useHeroHair({ root, back, front, state, origin: dOrigin, named: !!p.name, enabled: !flat });
+  const lockOn = useHeroLock({ enabled: flat, root, front, shadow: back, state });
 
   useDesktopMotion(
     ({ gsap }) => {
@@ -144,10 +149,15 @@ export function HeroMasthead(p: Props) {
             height={1500}
             alt={p.photoAlt}
             fetchPriority="high"
-            className="absolute left-1/2 top-1/2 aspect-[1.6] w-[calc(1.5*min(100cqw,160cqh))] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover phone:inset-0 phone:aspect-auto phone:h-full phone:w-full phone:max-w-full phone:translate-x-0 phone:translate-y-0 phone:object-[50%_18%]"
+            className={clsx(flat && "hero-river", "absolute left-1/2 top-1/2 aspect-[1.6] w-[calc(1.5*min(100cqw,160cqh))] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover phone:inset-0 phone:aspect-auto phone:h-full phone:w-full phone:max-w-full phone:translate-x-0 phone:translate-y-0 phone:object-[50%_18%]")}
           />
         </picture>
-        <canvas ref={back} aria-hidden className={clsx("absolute inset-0 h-full w-full opacity-0 transition-opacity duration-1000 phone:hidden", live && "opacity-100")} />
+        {flat ? (
+          // /v2: a slow light gliding along the hair behind the letters (CSS only)
+          <div aria-hidden className="hero-sheen absolute inset-0 phone:hidden" />
+        ) : (
+          <canvas ref={back} aria-hidden className={clsx("absolute inset-0 h-full w-full opacity-0 transition-opacity duration-1000 phone:hidden", live && "opacity-100")} />
+        )}
         <div data-hero-shade className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/20 to-ink/10 opacity-0 phone:hidden" />
         {/* Phones: shade so the header and the copy read over the photo */}
         <div aria-hidden className="absolute inset-0 hidden bg-[linear-gradient(to_bottom,rgb(15_11_12/0.5),transparent_22%,transparent_38%,rgb(15_11_12/0.72)_66%,rgb(15_11_12/0.92))] phone:block" />
@@ -169,8 +179,9 @@ export function HeroMasthead(p: Props) {
           <rect data-paper {...big} fill="var(--cream)" mask="url(#hero-mask-d)" />
         </svg>
       </div>
-      {/* The lock over the type, and its shadow on the paper */}
-      <canvas ref={front} aria-hidden className={clsx("pointer-events-none absolute inset-0 h-full w-full opacity-0 transition-opacity duration-700 phone:hidden", live && "opacity-100")} />
+      {/* The lock over the type, and its shadow on the paper (/v2: both in canvas 2D, the shadow softened by CSS) */}
+      {flat && <canvas ref={back} aria-hidden data-lock className={clsx("pointer-events-none absolute inset-0 h-full w-full opacity-0 blur-[7px] phone:hidden", lockOn && "opacity-100")} />}
+      <canvas ref={front} aria-hidden data-lock className={clsx("pointer-events-none absolute inset-0 h-full w-full opacity-0 transition-opacity duration-700 phone:hidden", (live || lockOn) && "opacity-100")} />
 
       {/* Copy on the paper: always above the 3D */}
       <div className="relative z-10 flex h-full flex-col justify-between pb-24 pt-[calc(var(--header-h)+1.25rem)] text-ink md:pb-24 phone:justify-end phone:pb-5 phone:text-cream">

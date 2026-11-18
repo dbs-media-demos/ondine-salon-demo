@@ -20,6 +20,8 @@ export function useHeroHair(o: {
   state: RefObject<HeroState>;
   origin: { x: number; y: number };
   named: boolean;
+  /** false on /v2, which has no 3D: three.js is never fetched. */
+  enabled?: boolean;
 }) {
   const [on, setOn] = useState(false);
 
@@ -27,7 +29,7 @@ export function useHeroHair(o: {
     const root = o.root.current;
     const back = o.back.current;
     const front = o.front.current;
-    if (!root || !back || !front || !canRun3D()) return;
+    if (o.enabled === false || !root || !back || !front || !canRun3D()) return;
 
     const abort = new AbortController();
     const cancelled = () => abort.signal.aborted;

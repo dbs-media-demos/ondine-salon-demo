@@ -35,7 +35,17 @@ const START = 2;
  * them, and the chosen one swings forward into the light. Clicking a tress picks it, like the buttons.
  * Too slow in its first 2 s on screen, and it fades back to the still (live3d.ts).
  */
-export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; groupLabel: string; bookLabel: string; stillAlt: string; shades: ShadeView[] }) {
+export function ShadeCard(p: {
+  eyebrow: string;
+  title: ReactNode;
+  text: string;
+  groupLabel: string;
+  bookLabel: string;
+  stillAlt: string;
+  shades: ShadeView[];
+  /** false on /v2 (no 3D): every device gets the still, a light that moves to the chosen tress, and tress clicks. */
+  live3d?: boolean;
+}) {
   const [sel, setSel] = useState(START);
   const [live, setLive] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
@@ -46,7 +56,7 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
   useEffect(() => {
     const el = stage.current;
     const cv = canvas.current;
-    if (!el || !cv || !canRun3D()) return;
+    if (p.live3d === false || !el || !cv || !canRun3D()) return;
     const abort = new AbortController();
     const cancelled = () => abort.signal.aborted;
     const off: (() => void)[] = [];
@@ -131,6 +141,7 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
     scene.current?.select(i);
   };
 
+  const flat = p.live3d === false;
   const local = (e: React.PointerEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -140,7 +151,7 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
     <div className="wrap grid items-center gap-x-16 gap-y-10 lg:grid-cols-[1.2fr_0.8fr] phone:gap-y-5">
       <div
         ref={stage}
-        className={clsx("relative aspect-[1.4] w-full", live && "cursor-pointer")}
+        className={clsx("relative aspect-[1.4] w-full", (live || flat) && "cursor-pointer", flat && "overflow-hidden")}
         onPointerMove={(e) => {
           if (e.pointerType !== "mouse" || !scene.current) return;
           const { x, y } = local(e);
@@ -148,6 +159,15 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
         }}
         onPointerLeave={() => scene.current?.pointer(0, 0, false)}
         onClick={(e) => {
+          if (flat) {
+            // The still: the tress nearest the click
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width;
+            const near = p.shades.map((_, i) => Math.abs(tressX(i, p.shades.length) - x));
+            const i = near.indexOf(Math.min(...near));
+            if (near[i] < 0.07) choose(i);
+            return;
+          }
           if (!scene.current) return;
           const { x, y } = local(e as unknown as React.PointerEvent);
           const i = scene.current.pick(x, y);
@@ -157,8 +177,8 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
         <picture>
           <source media={PHONE_QUERY} srcSet="/images/hair/shades-all-700.webp 700w, /images/hair/shades-all-1400.webp 1400w" sizes="100vw" />
           <img
-            src="/images/hair/shades-sel-1400.webp"
-            srcSet="/images/hair/shades-sel-700.webp 700w, /images/hair/shades-sel-1400.webp 1400w"
+            src={flat ? "/images/hair/shades-all-1400.webp" : "/images/hair/shades-sel-1400.webp"}
+            srcSet={flat ? "/images/hair/shades-all-700.webp 700w, /images/hair/shades-all-1400.webp 1400w" : "/images/hair/shades-sel-700.webp 700w, /images/hair/shades-sel-1400.webp 1400w"}
             sizes="(min-width: 1024px) 55vw, 100vw"
             width={1400}
             height={1000}
@@ -168,11 +188,25 @@ export function ShadeCard(p: { eyebrow: string; title: ReactNode; text: string; 
             className={clsx("absolute inset-0 h-full w-full transition-opacity duration-700", live && "opacity-0 delay-300")}
           />
         </picture>
-        <canvas ref={canvas} aria-hidden className={clsx("absolute inset-0 h-full w-full opacity-0 transition-opacity duration-700 phone:hidden", live && "opacity-100")} />
+        {flat ? (
+          // Desktop: the room dims around the chosen tress, and the light slides to the next one
+          <span aria-hidden className="pointer-events-none absolute inset-0 phone:hidden">
+            <span
+              className="absolute inset-y-0 -left-full w-[300%] transition-transform duration-700 ease-[var(--ease-out-expo)]"
+              style={{
+                transform: `translateX(${((tressX(sel, p.shades.length) - 0.5) * 100) / 3}%)`,
+                background: "linear-gradient(90deg, var(--dim) 46%, transparent 47.9%, transparent 52.1%, var(--dim) 54%)",
+                ["--dim" as string]: "color-mix(in oklab, var(--blush) 42%, transparent)",
+              }}
+            />
+          </span>
+        ) : (
+          <canvas ref={canvas} aria-hidden className={clsx("absolute inset-0 h-full w-full opacity-0 transition-opacity duration-700 phone:hidden", live && "opacity-100")} />
+        )}
         {/* Phones: the still doesn't move, so a mark under the chosen tress says which one it is */}
         <span
           aria-hidden
-          className="absolute bottom-[3%] hidden h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-wine transition-[left] duration-300 phone:block"
+          className={clsx("absolute bottom-[3%] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-wine transition-[left] duration-300 phone:block", !flat && "hidden")}
           style={{ left: `${tressX(sel, p.shades.length) * 100}%` }}
         />
       </div>

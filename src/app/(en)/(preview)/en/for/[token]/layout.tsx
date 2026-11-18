@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { BizProvider } from "@/components/preview/BizContext";
 import { PreviewGuard } from "@/components/preview/PreviewGuard";
 import { SiteChrome } from "@/components/layout/SiteChrome";
@@ -14,7 +14,8 @@ export default async function PreviewLayout({ children, params }: { children: Re
   const { token } = await params;
   const biz = await previewBiz(token);
   if (!biz) notFound();
-  if (biz.lang !== "en") redirect(`/for/${token}`);
+  // The page sends a business in the other language to the same version (/v2 too) under its own root
+  if (biz.lang !== "en") return children;
   return (
     <BizProvider biz={biz}>
       <SiteChrome locale="en" biz={biz}>
