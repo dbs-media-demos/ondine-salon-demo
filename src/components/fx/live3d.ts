@@ -5,33 +5,45 @@
  * fetched at all. Every scene shows its still first; the canvas fades in only once the scene is built,
  * its shaders are compiled and one frame has been drawn unseen. Scenes warm up one at a time, the next
  * one only after the one before has passed its first 2 s on screen. A scene that can't hold about
- * 45 fps over those 2 s (or drops one frame of 100 ms) fades back to its still, and so does every other
- * scene for the rest of the visit.
+ * 45 fps over those 2 s (or hitches: a 3rd frame over 100 ms, or one over 400 ms) fades back to its
+ * still, and so does every other scene on the page. That costs only this page load: the stills stay
+ * for the rest of the visit after two slow page loads, or at once without a proper graphics chip.
+ * One slow start used to keep them for the whole tab, so on 18 Nov every refresh got the stills.
  */
 
 /** Live 3D only on a big screen with a mouse. Everything else keeps the still. */
 export const DESK_3D = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 
+/** "gpu": no proper graphics chip, stills for the visit. An old "1" here (one slow start) no longer counts. */
 const STILL_KEY = "ondine:3d-still";
+/** Slow page loads in this tab so far: two keep the stills for the visit. */
+const SLOW_KEY = "ondine:3d-slow";
+const SLOW_LIMIT = 2;
+// Stills for the rest of this page load (a scene ran slow, or the visit already said so)
 let still = false;
 const giveUps = new Set<() => void>();
 
 const remembered = () => {
   try {
-    return sessionStorage.getItem(STILL_KEY) === "1";
+    return sessionStorage.getItem(STILL_KEY) === "gpu" || Number(sessionStorage.getItem(SLOW_KEY) || 0) >= SLOW_LIMIT;
   } catch {
     return false;
   }
 };
 
-/** This visit has already shown the 3D is too slow here (or there's no proper graphics chip). */
+/** This page load or visit has already shown the 3D is too slow here (or there's no proper graphics chip). */
 export const stillsOnly = () => still || (still = remembered());
 
-/** Every scene falls back to its still, now and for the rest of the visit. */
+/**
+ * Every scene falls back to its still for the rest of this page load. No graphics chip (`"no-gpu"`)
+ * keeps the stills for the visit; a slow scene counts one slow load toward the two that do.
+ */
 export function fallBack(why: string) {
+  const first = !still;
   still = true;
   try {
-    sessionStorage.setItem(STILL_KEY, "1");
+    if (why === "no-gpu") sessionStorage.setItem(STILL_KEY, "gpu");
+    else if (first) sessionStorage.setItem(SLOW_KEY, String(Number(sessionStorage.getItem(SLOW_KEY) || 0) + 1));
   } catch {}
   performance.mark(`3d:still:${why}`);
   giveUps.forEach((f) => f());
@@ -129,13 +141,16 @@ export type FrameWatch = {
 
 /**
  * Watches a scene's first 2 s of frames on screen (paused gaps don't count). Below ~45 fps on average,
- * or any frame over 100 ms once the first two are past, and `verdict(false)` is called; else `verdict(true)`.
+ * or a 3rd frame over 100 ms (or one over 400 ms) once the first five are past, and `verdict(false)` is
+ * called; else `verdict(true)`. The first frames pay one-off costs (a refresh's first draw took 371 ms
+ * on a PC that then ran 112 fps), and a hitch or two (a font, an image decode) isn't a slow computer.
  */
-export function frameWatch(verdict: (ok: boolean) => void, o = { span: 2000, fps: 45, worst: 100, skip: 2 }): FrameWatch {
+export function frameWatch(verdict: (ok: boolean) => void, o = { span: 2000, fps: 45, worst: 100, skip: 5 }): FrameWatch {
   let prev = 0;
   let skip = o.skip;
   let total = 0;
   let frames = 0;
+  let hitches = 0;
   let done = false;
   return {
     tick(now) {
@@ -145,7 +160,8 @@ export function frameWatch(verdict: (ok: boolean) => void, o = { span: 2000, fps
       if (!dt || skip-- > 0) return;
       total += dt;
       frames++;
-      const slow = dt > o.worst || (total >= o.span && (frames * 1000) / total < o.fps);
+      const hitch = dt > o.worst && (++hitches >= 3 || dt > o.worst * 4);
+      const slow = hitch || (total >= o.span && (frames * 1000) / total < o.fps);
       if (slow || total >= o.span) {
         done = true;
         verdict(!slow);

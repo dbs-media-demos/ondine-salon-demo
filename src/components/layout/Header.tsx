@@ -40,7 +40,9 @@ export function Header(p: Props) {
   const [hidden, setHidden] = useState(false);
   const [hover, setHover] = useState(0);
   const [onDark, setOnDark] = useState(false);
-  const lastY = useRef(0);
+  // scrollY when the header last hid or showed, or the furthest point since in that direction
+  const anchor = useRef(0);
+  const hid = useRef(false);
   const menuBtn = useRef<HTMLButtonElement>(null);
 
   // Hide on scroll down, reveal on scroll up; solid background once off the top.
@@ -55,9 +57,19 @@ export function Header(p: Props) {
           return r.top <= 40 && r.bottom >= 40;
         }),
       );
-      setHidden(y > 400 && y > lastY.current + 4);
-      if (y < lastY.current - 4 || y < 400) setHidden(false);
-      lastY.current = y;
+      // Hides or shows only after a clear 12 px in one direction since it last changed (or since the
+      // turn): Lenis eases a scroll out in steps of a pixel or less, and comparing each step with the
+      // one before flashed the header in and out over and over.
+      const dy = y - anchor.current;
+      if (y < 400) {
+        hid.current = false;
+        anchor.current = y;
+      } else if (hid.current ? dy > 0 : dy < 0) anchor.current = y; // still going the same way: follow it to the turn
+      else if (Math.abs(dy) > 12) {
+        hid.current = dy > 0;
+        anchor.current = y;
+      }
+      setHidden(hid.current);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
